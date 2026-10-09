@@ -1,43 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Website</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #101827;
-      color: white;
-      text-align: center;
-    }
-    main {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    h1 { font-size: 42px; }
-    p { color: #b9c3d3; font-size: 18px; }
-    .button {
-      margin-top: 20px;
-      padding: 14px 28px;
-      background: #3979ff;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>Welcome to My Website</h1>
-    <p>My first website is officially online!</p>
-    <a class="button" href="https://github.com">Visit GitHub</a>
-  </main>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Brushworks Tracker | Home</title><link rel="stylesheet" href="style.css"></head>
+<body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ BRUSHWORKS TRACKER</a><div class="links"><a class="active" href="index.html">Home</a><a href="track.html">Track Climbs</a></div></nav></header>
+<main class="wrap"><section class="hero"><div class="eyebrow">The crew climbing challenge</div><h1>Welcome, climbers.</h1><p>Track your sends, challenge your friends, and climb the leaderboard.</p><a class="button" href="track.html">Explore the gym map →</a></section><section class="card"><h2>🏆 Leaderboard</h2><p class="muted">Demo scores for now. We'll connect real climber accounts and shared sends next.</p><table class="leader"><thead><tr><th>Rank</th><th>Climber</th><th>Points</th></tr></thead><tbody id="leaderboard"></tbody></table></section><div class="stat">🧗 Grades V0–V10</div><div class="stat">⭐ Each unique send counts once</div></main><footer><div class="wrap">Made for the Brushworks climbing crew · Unofficial fan project</div></footer><script src="script.js"></script></body></html>
