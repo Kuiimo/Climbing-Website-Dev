@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Climb Tracker | Track Climbs </title>
+  <title>Climb Tracker | Track Climbs</title>
   <link rel="stylesheet" href="style.css?v=7">
 
   <style>
@@ -188,6 +188,18 @@
       z-index: 5;
       pointer-events: none;
     }
+
+    .preview-marker.edit-draggable {
+      pointer-events: auto;
+      cursor: grab;
+      border-style: solid;
+      background: #f59e0b;
+      color: #111827;
+      z-index: 8;
+      touch-action: none;
+    }
+    .preview-marker.edit-draggable.dragging { cursor: grabbing; }
+    .climb-marker.edit-original { opacity: .28; pointer-events: none; }
 
     .map-hint {
       color: #66d9d5;
@@ -456,6 +468,19 @@
         then drag to move.
       </p>
 
+      <div class="map-toolbar" style="align-items:center;gap:12px;">
+        <label for="gradeFilter" style="font-weight:700;color:#66d9d5;">Show climbs:</label>
+        <select id="gradeFilter" aria-label="Filter climbs by grade" style="background:#111827;color:white;border:1px solid #475569;border-radius:9px;padding:11px;min-height:44px;">
+          <option value="all">All grades</option>
+          <option value="0">V0 only</option><option value="1">V1 only</option>
+          <option value="2">V2 only</option><option value="3">V3 only</option>
+          <option value="4">V4 only</option><option value="5">V5 only</option>
+          <option value="6">V6 only</option><option value="7">V7 only</option>
+          <option value="8">V8 only</option><option value="9">V9 only</option>
+          <option value="10">V10 only</option>
+        </select>
+        <span id="gradeFilterCount" class="muted" aria-live="polite"></span>
+      </div>
       <div class="map-toolbar">
         <button type="button" id="wallModeBtn" class="zoom-button">Select Wall</button>
         <span id="wallModeHint" class="muted">Switch on to highlight and reset individual wall faces.</span>
@@ -464,7 +489,7 @@
         <div id="mapContainer" class="map-container">
           <img
             id="gymMap"
-            src="images/gym-map.png"
+            src="images/gym-map.png?v=12"
             alt="Map of Brushworks climbing gym"
             draggable="false"
           >
@@ -668,7 +693,7 @@
 
     /* Wall face boundaries are approximate outlines of the current map.
        Purple is intentionally not selectable/resettable. */
-    const WALLS = [{"id":"T01","name":"Top teal left","points":[[1,2],[36,2],[36,6],[27,8],[1,5]]},{"id":"T02","name":"Top teal right","points":[[36,2],[76,2],[73,7],[48,8],[36,6]]},{"id":"B01","name":"Upper beige left","points":[[1,10],[48,10],[43,18],[34,14],[23,18],[8,14],[1,25]]},{"id":"T03","name":"Upper teal right","points":[[48,10],[99,10],[99,13],[91,13],[78,20],[74,23],[48,22],[43,18]]},{"id":"T04","name":"Left teal upper","points":[[1,25],[5,21],[5,52],[1,57]]},{"id":"T05","name":"Left teal lower","points":[[1,52],[5,52],[5,70],[11,76],[1,81]]},{"id":"B02","name":"Bottom beige left","points":[[1,81],[11,76],[11,91],[23,91],[27,88],[32,88],[35,98],[1,98]]},{"id":"B03","name":"Centre beige upper","points":[[28,31],[34,30],[40,37],[47,45],[53,54],[54,64],[51,67]]},{"id":"T06","name":"Centre teal lower","points":[[28,31],[51,67],[48,70],[33,62],[26,45]]},{"id":"B04","name":"Right beige upper","points":[[70,54],[91,35],[97,40],[72,62]]},{"id":"T07","name":"Right teal lower","points":[[72,62],[97,40],[96,52],[89,66],[75,68]]}];
+    const WALLS = [{"id":"B01","name":"Upper beige wall","points":[[2.287,5.588],[48.476,5.588],[42.454,14.762],[33.308,9.925],[23.399,14.012],[9.451,10.175],[2.287,21.018]]},{"id":"T03","name":"Upper teal wall","points":[[48.857,5.588],[95.122,5.588],[95.122,8.507],[87.043,8.507],[73.018,16.013],[71.113,20.017],[48.018,18.349],[42.454,14.762]]},{"id":"T04","name":"Left teal upper","points":[[2.287,20.851],[5.107,18.682],[5.107,26.105],[6.936,32.861],[4.878,43.369],[4.878,59.633],[11.509,70.309],[2.287,76.314]]},{"id":"B02","name":"Lower left beige","points":[[2.287,76.314],[11.509,70.309],[11.509,83.82],[21.418,83.82],[24.238,81.902],[31.784,81.902],[35.137,92.994],[2.287,92.994]]},{"id":"B03","name":"Centre island beige","points":[[26.524,27.189],[31.86,26.272],[35.823,28.023],[37.195,31.943],[51.296,48.791],[52.439,58.465],[50.305,60.384]]},{"id":"T06","name":"Centre island teal","points":[[26.524,27.189],[50.305,60.384],[47.79,63.053],[32.774,55.463],[25.534,41.368]]},{"id":"B04","name":"Right island beige","points":[[68.674,48.791],[88.034,30.525],[93.369,34.195],[72.256,59.883],[69.893,56.797]]},{"id":"T07","name":"Right island teal","points":[[72.256,59.883],[93.369,34.195],[93.826,38.449],[83.46,61.134],[74.543,63.053]]}];
     let wallMode = false;
     let chosenWall = null;
     const wallOverlay = $("wallOverlay");
@@ -785,6 +810,9 @@
       mode = "view";
       hidePanels();
       preview.classList.add("hidden");
+      preview.classList.remove("edit-draggable", "dragging");
+      preview.textContent = "+";
+      map.querySelectorAll(".edit-original").forEach(el => el.classList.remove("edit-original"));
     }
 
     /* ===================================
@@ -807,6 +835,7 @@
     let gestureMoved = false;
     let gestureWasPinch = false;
     let activePointerTarget = null;
+    let draggingEditMarker = false;
 
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -1037,8 +1066,11 @@
           gestureMoved = false;
           gestureWasPinch = false;
           activePointerTarget = event.target;
+          draggingEditMarker = mode === "edit" &&
+            (event.target === preview || event.target.closest?.("#previewMarker"));
         }
 
+        if (pointers.size > 0) draggingEditMarker = false;
         pointers.set(
           event.pointerId,
           viewportPoint(
@@ -1073,6 +1105,18 @@
         );
 
         const points = [...pointers.values()];
+
+        if (draggingEditMarker && points.length === 1 && mode === "edit") {
+          const pct = screenToPercent(points[0]);
+          pendingPosition = {
+            x: clamp(pct.x, 0, 100),
+            y: clamp(pct.y, 0, 100)
+          };
+          showPreview(pendingPosition);
+          preview.classList.add("dragging");
+          gestureMoved = true;
+          return;
+        }
 
         if (
           points.length === 1 &&
@@ -1109,6 +1153,8 @@
           points.length >= 2 &&
           gestureStart?.type === "pinch"
         ) {
+          draggingEditMarker = false;
+          preview.classList.remove("dragging");
           const centre = midpoint(
             points[0],
             points[1]
@@ -1156,6 +1202,11 @@
       pointers.delete(event.pointerId);
 
       viewport.classList.remove("dragging");
+      preview.classList.remove("dragging");
+      if (draggingEditMarker && pointers.size === 0) {
+        draggingEditMarker = false;
+        message("New position selected. Press Save Changes to keep it.");
+      }
 
       if (pointers.size > 0) {
         startGesture();
@@ -1354,11 +1405,18 @@
        COLOURED CLIMB MARKERS
        =================================== */
 
+    $("gradeFilter").addEventListener("change", renderMarkers);
+
     function renderMarkers() {
       map.querySelectorAll(".climb-marker")
         .forEach(marker => marker.remove());
 
-      climbs.forEach(climb => {
+      const gradeChoice = $("gradeFilter").value;
+      const visibleClimbs = climbs.filter(climb =>
+        gradeChoice === "all" || Number(climb.grade) === Number(gradeChoice)
+      );
+      $("gradeFilterCount").textContent = visibleClimbs.length + " climb(s)";
+      visibleClimbs.forEach(climb => {
         const marker =
           document.createElement("button");
 
@@ -1786,12 +1844,17 @@
       };
 
       showPreview(pendingPosition);
+      preview.textContent = "↕";
+      preview.classList.add("edit-draggable");
+      map.querySelectorAll(".climb-marker").forEach(el => {
+        el.classList.toggle("edit-original", String(selectedClimb.id) === el.dataset.climbId);
+      });
 
       hidePanels();
       editPanel.classList.remove("hidden");
 
       message(
-        "Editing climb. Pinch or scroll to zoom, then tap an empty spot to reposition it."
+        "Drag the orange marker to reposition. You can also tap an empty spot. Save Changes to confirm."
       );
     };
 
