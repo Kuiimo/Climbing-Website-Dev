@@ -373,6 +373,16 @@
         max-height: 650px !important;
       }
     }
+
+    /* Wall selection highlights; markers stay their original size. */
+    #wallOverlay { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1; }
+    #wallOverlay polygon { fill:#4de0d5; fill-opacity:.04; stroke:transparent; stroke-width:.45; vector-effect:non-scaling-stroke; }
+    #wallOverlay polygon.hovered, #wallOverlay polygon.selected { fill-opacity:.32; stroke:#6ef9e7; stroke-width:2; }
+    #wallOverlay polygon.selected { fill-opacity:.40; }
+    #wallModeBtn { font-size:14px; background:#334155; }
+    #wallModeBtn.active { background:#35b8b5; color:#081521; }
+    #wallPanel { border:1px solid #35b8b5; }
+    #wallPanel .danger { background:#b91c1c; color:white; }
   </style>
 </head>
 
@@ -446,6 +456,10 @@
         then drag to move.
       </p>
 
+      <div class="map-toolbar">
+        <button type="button" id="wallModeBtn" class="zoom-button">Select Wall</button>
+        <span id="wallModeHint" class="muted">Switch on to highlight and reset individual wall faces.</span>
+      </div>
       <div id="mapViewport" class="map-viewport">
         <div id="mapContainer" class="map-container">
           <img
@@ -454,6 +468,8 @@
             alt="Map of Brushworks climbing gym"
             draggable="false"
           >
+
+          <svg id="wallOverlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
 
           <div
             id="previewMarker"
@@ -466,6 +482,15 @@
         Tap or click an empty spot to add a climb.
         Select a coloured marker to see its details.
       </p>
+    </section>
+
+    <section id="wallPanel" class="tracker-panel hidden">
+      <h2 id="wallTitle">Wall</h2>
+      <p id="wallDescription" class="muted"></p>
+      <div class="action-row">
+        <button id="resetWallBtn" class="danger">Reset Wall</button>
+        <button id="closeWallBtn" class="secondary">Close</button>
+      </div>
     </section>
 
     <!-- ADD CLIMB -->
@@ -640,6 +665,95 @@
       grey: "#6b7280"
     };
 
+
+    /* Wall face boundaries are approximate outlines of the current map.
+       Purple is intentionally not selectable/resettable. */
+    const WALLS = [{"id":"T01","name":"Top teal left","points":[[1,2],[36,2],[36,6],[27,8],[1,5]]},{"id":"T02","name":"Top teal right","points":[[36,2],[76,2],[73,7],[48,8],[36,6]]},{"id":"B01","name":"Upper beige left","points":[[1,10],[48,10],[43,18],[34,14],[23,18],[8,14],[1,25]]},{"id":"T03","name":"Upper teal right","points":[[48,10],[99,10],[99,13],[91,13],[78,20],[74,23],[48,22],[43,18]]},{"id":"T04","name":"Left teal upper","points":[[1,25],[5,21],[5,52],[1,57]]},{"id":"T05","name":"Left teal lower","points":[[1,52],[5,52],[5,70],[11,76],[1,81]]},{"id":"B02","name":"Bottom beige left","points":[[1,81],[11,76],[11,91],[23,91],[27,88],[32,88],[35,98],[1,98]]},{"id":"B03","name":"Centre beige upper","points":[[28,31],[34,30],[40,37],[47,45],[53,54],[54,64],[51,67]]},{"id":"T06","name":"Centre teal lower","points":[[28,31],[51,67],[48,70],[33,62],[26,45]]},{"id":"B04","name":"Right beige upper","points":[[70,54],[91,35],[97,40],[72,62]]},{"id":"T07","name":"Right teal lower","points":[[72,62],[97,40],[96,52],[89,66],[75,68]]}];
+    let wallMode = false;
+    let chosenWall = null;
+    const wallOverlay = $("wallOverlay");
+    const wallPanel = $("wallPanel");
+
+    function pointInsidePolygon(x,y,points) {
+      let inside = false;
+      for(let i=0,j=points.length-1;i<points.length;j=i++) {
+        const [xi,yi]=points[i], [xj,yj]=points[j];
+        if (((yi>y)!==(yj>y)) &&
+            (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+      }
+      return inside;
+    }
+    function wallAt(x,y) {
+      return WALLS.find(w=>pointInsidePolygon(x,y,w.points)) || null;
+    }
+    function screenToPercent(point) {
+      return {x:(point.x-offsetX)/(mapWidth*scale)*100,
+              y:(point.y-offsetY)/(mapHeight*scale)*100};
+    }
+    function drawWallOverlay() {
+      wallOverlay.style.left=offsetX+'px';
+      wallOverlay.style.top=offsetY+'px';
+      wallOverlay.style.width=(mapWidth*scale)+'px';
+      wallOverlay.style.height=(mapHeight*scale)+'px';
+    }
+    function highlightWall(wall) {
+      wallOverlay.querySelectorAll('polygon').forEach(poly=>{
+        poly.classList.toggle('hovered',!!wall && poly.dataset.wallId===wall.id);
+        poly.classList.toggle('selected',!!chosenWall && poly.dataset.wallId===chosenWall.id);
+      });
+    }
+    WALLS.forEach(w=>{
+      const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      poly.setAttribute('points',w.points.map(p=>p.join(',')).join(' '));
+      poly.dataset.wallId=w.id;
+      wallOverlay.appendChild(poly);
+    });
+    $('wallModeBtn').onclick=()=>{
+      wallMode=!wallMode;
+      $('wallModeBtn').classList.toggle('active',wallMode);
+      $('wallModeBtn').textContent=wallMode?'Exit Wall Mode':'Select Wall';
+      $('wallModeHint').textContent=wallMode
+        ? 'Hover or tap a teal/beige wall face. Purple never resets.'
+        : 'Switch on to highlight and reset individual wall faces.';
+      chosenWall=null;
+      wallPanel.classList.add('hidden');
+      highlightWall(null);
+      if(wallMode) clearSelection();
+    };
+    viewport.addEventListener('pointermove',event=>{
+      if(!wallMode || pointers.size>0) return;
+      const pct=screenToPercent(viewportPoint(event.clientX,event.clientY));
+      highlightWall(wallAt(pct.x,pct.y));
+    });
+    viewport.addEventListener('pointerleave',()=>highlightWall(null));
+    function chooseWall(wall) {
+      chosenWall=wall;
+      highlightWall(wall);
+      if(!wall) { wallPanel.classList.add('hidden'); return; }
+      $('wallTitle').textContent=wall.name;
+      const count=climbs.filter(c=>c.wall_id===wall.id).length;
+      $('wallDescription').textContent=count+' active climb(s) on this face. Resetting archives these climbs, but keeps all sends and points.';
+      wallPanel.classList.remove('hidden');
+      wallPanel.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    $('closeWallBtn').onclick=()=>chooseWall(null);
+    $('resetWallBtn').onclick=async()=>{
+      if(!chosenWall || !currentUser || busy) return;
+      const wall=chosenWall;
+      const count=climbs.filter(c=>c.wall_id===wall.id).length;
+      if(!confirm('Reset '+wall.name+'? This will archive '+count+' active climb(s) for everyone. Existing sends and points stay saved.')) return;
+      busy=true;
+      $('resetWallBtn').disabled=true;
+      try {
+        const {data,error}=await supabaseClient.rpc('reset_climbing_wall',{p_wall_id:wall.id});
+        if(error) throw error;
+        await loadClimbs();
+        chooseWall(wall);
+        message('Wall reset complete: '+data+' climbs archived. All earned points remain.');
+      } catch(error) {console.error(error);message('Could not reset wall: '+error.message);}
+      finally {busy=false;$('resetWallBtn').disabled=false;}
+    };
+
     let currentUser = null;
     let currentProfile = null;
     let climbs = [];
@@ -792,6 +906,7 @@
         scale <= MIN_SCALE;
 
       positionAllMarkers();
+      drawWallOverlay();
     }
 
     /* Zoom around cursor/finger position. */
@@ -1203,8 +1318,9 @@
           supabaseClient
             .from("climbs")
             .select(
-              "id, grade, colour, x_position, y_position, created_by, created_at"
+              "id, grade, colour, x_position, y_position, created_by, created_at, wall_id"
             )
+            .eq("is_active", true)
             .order("created_at", {
               ascending: true
             }),
@@ -1294,6 +1410,11 @@
 
     function handleMapTap(point, target) {
       if (busy) return;
+      if (wallMode) {
+        const pct=screenToPercent(point);
+        chooseWall(wallAt(pct.x,pct.y));
+        return;
+      }
 
       if (!currentUser || !currentProfile) {
         message(
@@ -1409,7 +1530,8 @@
             colour: $("colourSelect").value,
             x_position: position.x,
             y_position: position.y,
-            created_by: currentUser.id
+            created_by: currentUser.id,
+            wall_id: (wallAt(position.x,position.y) || {}).id || null
           });
 
         if (error) throw error;
@@ -1728,7 +1850,8 @@
               colour:
                 $("editColourSelect").value,
               x_position: position.x,
-              y_position: position.y
+              y_position: position.y,
+              wall_id: (wallAt(position.x,position.y) || {}).id || null
             })
             .eq("id", climbId)
             .eq("created_by", currentUser.id)
