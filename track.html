@@ -1,4 +1,588 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Brushworks Tracker | Track Climbs</title><link rel="stylesheet" href="style.css"></head>
-<body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ BRUSHWORKS TRACKER</a><div class="links"><a href="index.html">Home</a><a class="active" href="track.html">Track Climbs</a></div></nav></header>
-<main class="wrap"><div class="eyebrow">Your climbing gym</div><h1>Track Climbs</h1><p>Find where you climbed. Soon you'll be able to tap a spot on the map, add its V grade, and log your send against the same climb as your friends.</p><section class="card"><h2>Gym map</h2><img class="map" src="images/gym-map.png" alt="Stylised top-down map of the Brushworks climbing gym without wall names"><p class="muted">Map preview — interactive climb markers are coming in the next stage.</p></section><p class="note">Next step: Add climb markers and connect a shared database so everyone sees the same routes and sends.</p></main><footer><div class="wrap">Made for the Brushworks climbing crew · Unofficial fan project</div></footer></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Brushworks Tracker | Track Climbs</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .map-container {
+      position: relative;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #111827;
+      line-height: 0;
+      cursor: crosshair;
+    }
+
+    .map-container img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .climb-marker {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid white;
+      background: #3979ff;
+      color: white;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 2px 8px #0008;
+    }
+
+    .climb-marker.sent {
+      background: #16a34a;
+    }
+
+    .climb-marker:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+
+    .tracker-panel {
+      background: #1f2937;
+      color: white;
+      padding: 22px;
+      border-radius: 14px;
+      margin-top: 20px;
+    }
+
+    .tracker-panel h2 {
+      margin-top: 0;
+    }
+
+    .tracker-panel select,
+    .tracker-panel button {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      margin: 6px 6px 6px 0;
+      font-size: 15px;
+    }
+
+    .tracker-panel select {
+      background: #111827;
+      color: white;
+    }
+
+    .tracker-panel button {
+      background: #3979ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .tracker-panel button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .tracker-panel .secondary {
+      background: #475569;
+    }
+
+    .tracker-panel .success {
+      background: #15803d;
+    }
+
+    .tracker-panel .danger {
+      background: #b91c1c;
+    }
+
+    .tracker-panel .hidden {
+      display: none;
+    }
+
+    .tracker-panel .muted {
+      color: #9ca3af;
+    }
+
+    #sendList {
+      padding-left: 20px;
+    }
+
+    #trackerMessage {
+      margin-top: 15px;
+      color: #93c5fd;
+      overflow-wrap: anywhere;
+    }
+
+    .tracker-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .tracker-links a {
+      color: #93c5fd;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <nav class="wrap nav">
+      <a class="brand" href="index.html">
+        ⛰ BRUSHWORKS TRACKER
+      </a>
+
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a class="active" href="track.html">Track Climbs</a>
+        <a href="profile.html">My Profile</a>
+        <a href="leaderboard.html">Leaderboard</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="wrap">
+
+    <div class="eyebrow">Your climbing gym</div>
+
+    <h1>Track Climbs</h1>
+
+    <p>
+      Tap a spot on the gym map to add a new climb.
+      Tap an existing marker to log your send or see
+      who else has completed it.
+    </p>
+
+    <div class="tracker-links">
+      <a href="profile.html">My Profile</a>
+      <a href="leaderboard.html">View Leaderboard</a>
+    </div>
+
+    <section class="card">
+      <h2>Brushworks Gym Map</h2>
+
+      <p class="muted">
+        Blue markers are available climbs.
+        Green markers are climbs you've sent.
+      </p>
+
+      <div id="mapContainer" class="map-container">
+
+        <img
+          id="gymMap"
+          src="images/gym-map.png"
+          alt="Top-down map of Brushworks climbing gym"
+        >
+
+        <!-- Shared climb markers appear here -->
+
+      </div>
+
+      <p class="muted">
+        Click an empty spot to create a climb.
+        Click a marker to view its details.
+      </p>
+    </section>
+
+    <!-- Add climb panel -->
+    <section id="addPanel" class="tracker-panel hidden">
+
+      <h2>Add a New Climb</h2>
+
+      <p class="muted">
+        Choose the grade for the spot you selected.
+      </p>
+
+      <label for="gradeSelect">Climb grade</label>
+
+      <select id="gradeSelect">
+        <option value="0">V0</option>
+        <option value="1">V1</option>
+        <option value="2">V2</option>
+        <option value="3">V3</option>
+        <option value="4">V4</option>
+        <option value="5">V5</option>
+        <option value="6">V6</option>
+        <option value="7">V7</option>
+        <option value="8">V8</option>
+        <option value="9">V9</option>
+        <option value="10">V10</option>
+      </select>
+
+      <div>
+        <button id="saveClimbBtn">
+          Save Climb
+        </button>
+
+        <button id="cancelAddBtn" class="secondary">
+          Cancel
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Existing climb panel -->
+    <section id="climbPanel" class="tracker-panel hidden">
+
+      <h2 id="selectedGrade">Climb Details</h2>
+
+      <p id="climbInfo" class="muted"></p>
+
+      <h3>Climbers who sent this</h3>
+
+      <ul id="sendList"></ul>
+
+      <div>
+        <button id="sendBtn" class="success">
+          Mark as Sent
+        </button>
+
+        <button id="removeSendBtn" class="danger hidden">
+          Remove My Send
+        </button>
+
+        <button id="closeClimbBtn" class="secondary">
+          Close
+        </button>
+      </div>
+
+    </section>
+
+    <p id="trackerMessage" role="status"></p>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Made for the Brushworks climbing crew · Unofficial fan project
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const mapContainer = document.getElementById("mapContainer");
+    const addPanel = document.getElementById("addPanel");
+    const climbPanel = document.getElementById("climbPanel");
+    const trackerMessage = document.getElementById("trackerMessage");
+
+    let currentUser = null;
+    let currentProfile = null;
+    let climbs = [];
+    let mySentClimbIds = new Set();
+
+    let pendingPosition = null;
+    let selectedClimb = null;
+
+    function showMessage(text) {
+      trackerMessage.textContent = text;
+    }
+
+    function hidePanels() {
+      addPanel.classList.add("hidden");
+      climbPanel.classList.add("hidden");
+    }
+
+    async function initialiseTracker() {
+      try {
+        const authResult = await supabaseClient.auth.getUser();
+
+        if (authResult.error || !authResult.data.user) {
+          window.location.replace("login.html");
+          return;
+        }
+
+        currentUser = authResult.data.user;
+
+        const profileResult = await supabaseClient
+          .from("profiles")
+          .select("id, username")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        if (profileResult.error) throw profileResult.error;
+
+        if (!profileResult.data) {
+          window.location.replace("profile.html");
+          return;
+        }
+
+        currentProfile = profileResult.data;
+
+        await loadClimbs();
+
+      } catch (error) {
+        console.error(error);
+        showMessage("Could not load tracker: " + error.message);
+      }
+    }
+
+    async function loadClimbs() {
+      const [climbResult, sendResult] = await Promise.all([
+        supabaseClient
+          .from("climbs")
+          .select("id, grade, x_position, y_position, created_at")
+          .order("created_at", { ascending: true }),
+
+        supabaseClient
+          .from("sends")
+          .select("climb_id")
+          .eq("user_id", currentUser.id)
+      ]);
+
+      if (climbResult.error) throw climbResult.error;
+      if (sendResult.error) throw sendResult.error;
+
+      climbs = climbResult.data || [];
+
+      mySentClimbIds = new Set(
+        (sendResult.data || []).map(send => send.climb_id)
+      );
+
+      renderMarkers();
+    }
+
+    function renderMarkers() {
+      mapContainer.querySelectorAll(".climb-marker")
+        .forEach(marker => marker.remove());
+
+      climbs.forEach(climb => {
+        const marker = document.createElement("button");
+
+        marker.type = "button";
+        marker.className = "climb-marker";
+
+        if (mySentClimbIds.has(climb.id)) {
+          marker.classList.add("sent");
+        }
+
+        marker.textContent = "V" + climb.grade;
+        marker.title = "V" + climb.grade + " — view climb";
+
+        marker.style.left = climb.x_position + "%";
+        marker.style.top = climb.y_position + "%";
+
+        marker.onclick = event => {
+          event.stopPropagation();
+          openClimb(climb);
+        };
+
+        mapContainer.appendChild(marker);
+      });
+    }
+
+    // Click an empty location on the map to add a climb
+    mapContainer.addEventListener("click", event => {
+      if (!currentUser || !currentProfile) {
+        showMessage("Please log in and create a profile first.");
+        return;
+      }
+
+      const rect = mapContainer.getBoundingClientRect();
+
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+      pendingPosition = {
+        x: Math.max(0, Math.min(100, x)),
+        y: Math.max(0, Math.min(100, y))
+      };
+
+      selectedClimb = null;
+      hidePanels();
+      addPanel.classList.remove("hidden");
+      showMessage("Choose the grade, then save your climb.");
+
+      addPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    });
+
+    document.getElementById("cancelAddBtn").onclick = () => {
+      pendingPosition = null;
+      hidePanels();
+      showMessage("");
+    };
+
+    document.getElementById("saveClimbBtn").onclick = async () => {
+      if (!pendingPosition || !currentUser) return;
+
+      const button = document.getElementById("saveClimbBtn");
+      button.disabled = true;
+
+      showMessage("Saving climb...");
+
+      try {
+        const grade = Number(
+          document.getElementById("gradeSelect").value
+        );
+
+        const { error } = await supabaseClient
+          .from("climbs")
+          .insert({
+            grade: grade,
+            x_position: pendingPosition.x,
+            y_position: pendingPosition.y,
+            created_by: currentUser.id
+          });
+
+        if (error) throw error;
+
+        pendingPosition = null;
+        hidePanels();
+
+        await loadClimbs();
+
+        showMessage(
+          "Climb added! Click its marker to log your send."
+        );
+
+      } catch (error) {
+        console.error(error);
+        showMessage("Could not save climb: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    };
+
+    async function openClimb(climb) {
+      selectedClimb = climb;
+      pendingPosition = null;
+      hidePanels();
+
+      document.getElementById("selectedGrade")
+        .textContent = "V" + climb.grade + " Climb";
+
+      document.getElementById("climbInfo")
+        .textContent = climb.grade + " points per send";
+
+      const sent = mySentClimbIds.has(climb.id);
+
+      document.getElementById("sendBtn")
+        .classList.toggle("hidden", sent);
+
+      document.getElementById("removeSendBtn")
+        .classList.toggle("hidden", !sent);
+
+      climbPanel.classList.remove("hidden");
+
+      await loadClimbSends(climb.id);
+
+      climbPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }
+
+    async function loadClimbSends(climbId) {
+      const list = document.getElementById("sendList");
+      list.replaceChildren();
+
+      const { data, error } = await supabaseClient
+        .from("sends")
+        .select("user_id, profiles(username)")
+        .eq("climb_id", climbId);
+
+      if (error) {
+        showMessage("Could not load sends: " + error.message);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "Nobody has sent this climb yet.";
+        list.appendChild(item);
+        return;
+      }
+
+      data.forEach(send => {
+        const item = document.createElement("li");
+        item.textContent =
+          send.profiles?.username || "Unknown climber";
+        list.appendChild(item);
+      });
+    }
+
+    document.getElementById("sendBtn").onclick = async () => {
+      if (!selectedClimb || !currentUser) return;
+
+      const button = document.getElementById("sendBtn");
+      button.disabled = true;
+
+      try {
+        const { error } = await supabaseClient
+          .from("sends")
+          .insert({
+            user_id: currentUser.id,
+            climb_id: selectedClimb.id
+          });
+
+        if (error) throw error;
+
+        mySentClimbIds.add(selectedClimb.id);
+        renderMarkers();
+
+        showMessage(
+          "Send recorded! You earned " +
+          selectedClimb.grade + " points."
+        );
+
+        await openClimb(selectedClimb);
+
+      } catch (error) {
+        console.error(error);
+        showMessage("Could not log send: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    };
+
+    document.getElementById("removeSendBtn").onclick = async () => {
+      if (!selectedClimb || !currentUser) return;
+
+      const button = document.getElementById("removeSendBtn");
+      button.disabled = true;
+
+      try {
+        const { error } = await supabaseClient
+          .from("sends")
+          .delete()
+          .eq("user_id", currentUser.id)
+          .eq("climb_id", selectedClimb.id);
+
+        if (error) throw error;
+
+        mySentClimbIds.delete(selectedClimb.id);
+        renderMarkers();
+
+        showMessage("Your send has been removed.");
+
+        await openClimb(selectedClimb);
+
+      } catch (error) {
+        console.error(error);
+        showMessage("Could not remove send: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    };
+
+    document.getElementById("closeClimbBtn").onclick = () => {
+      selectedClimb = null;
+      hidePanels();
+      showMessage("");
+    };
+
+    initialiseTracker();
+  </script>
+
+</body>
+</html>
