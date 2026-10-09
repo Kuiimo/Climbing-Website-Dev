@@ -1,5 +1,62 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Climb Tracker | Gallery</title><style>
 body{background:#101827;color:#f8fafc;margin:0;font-family:Arial,sans-serif}header{background:#142133;border-bottom:1px solid #334155}header .nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0}header .brand{color:#66d9d5;font-size:16px;font-weight:800;text-decoration:none;white-space:nowrap}header .links{display:flex;flex-wrap:wrap;gap:10px}header .links a{background:#24364d;color:white;padding:12px 18px;border-radius:10px;font-weight:700;text-decoration:none}header .links a.active{background:#35b8b5;color:#081521}.page{max-width:760px;margin:36px auto 70px}.muted{color:#94a3b8}.post{background:#1f2937;border:1px solid #334155;border-radius:16px;overflow:hidden;margin:20px 0}.post-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px}.post-head time{color:#94a3b8;font-size:13px;text-align:right}.user-link{display:inline-flex;align-items:center;gap:10px;color:#66d9d5;text-decoration:none;font-weight:800;overflow-wrap:anywhere}.user-link:hover{text-decoration:underline}.avatar{height:42px;width:42px;flex:0 0 42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#35b8b5;color:#081521;font-weight:800;font-size:20px;overflow:hidden}.avatar img{height:100%;width:100%;object-fit:cover}.post-media{display:block;width:100%;max-height:660px;object-fit:contain;background:#0b1220}.post h2{font-size:19px;margin:18px 18px 8px}.post p{margin:0 18px 20px}.notice{color:#93c5fd;margin:18px 0}.profile-card{background:#1f2937;border:1px solid #334155;border-radius:16px;padding:22px;margin:20px 0}.profile-top{display:flex;align-items:center;gap:15px}.profile-top .avatar{height:76px;width:76px;flex-basis:76px;font-size:32px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stat{background:#101827;border-radius:12px;padding:16px}.stat strong{display:block;font-size:26px;color:#66d9d5}.stat span{font-size:13px;color:#94a3b8}.grades{display:flex;flex-wrap:wrap;gap:9px}.grade{background:#101827;border-radius:9px;padding:10px 13px;color:#e2e8f0}a.back{color:#66d9d5}@media(max-width:720px){header .nav{flex-direction:column;align-items:flex-start}header .links a{padding:10px 12px;font-size:13px}.page{margin-top:22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.post-head{align-items:flex-start}}
+</style><style id="mobile-responsive-upgrade">
+/* Mobile layout improvements — does not change Supabase or map coordinates. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, video { max-width: 100%; }
+.wrap { width: min(100% - 28px, 1160px); margin-left: auto; margin-right: auto; }
+header .links { min-width: 0; }
+header .links a { text-align: center; }
+button, input, select, textarea { max-width: 100%; }
+@media (max-width: 700px) {
+  header .nav { gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+  header .brand { font-size: 15px; }
+  header .links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; width: 100%; }
+  header .links a { display: flex; align-items: center; justify-content: center; min-height: 43px; padding: 8px 5px; font-size: 12px; line-height: 1.2; white-space: normal; }
+  h1 { font-size: clamp(26px,7vw,36px); }
+  .dashboard-links { gap: 9px; }
+  .dashboard-links a { flex: 1 1 145px; text-align: center; }
+  .dashboard-card, .profile-card { padding: 16px; }
+  .dashboard-table { font-size: 12px; }
+  .dashboard-table th, .dashboard-table td { padding: 9px 4px; }
+  .stat-card { padding: 15px 9px; }
+  .leaderboard-page { padding-top: 20px; }
+  .player-row { gap: 9px; padding: 12px 10px; }
+  .player-rank { min-width: 36px; font-size: 18px; }
+  .player-name { font-size: 15px; overflow-wrap: anywhere; }
+  .player-points { font-size: 19px; }
+  .profile-top { align-items: flex-start; }
+  .profile-name { overflow-wrap: anywhere; }
+  .profile-stats { gap: 9px; }
+  .profile-stat { padding: 13px; }
+  .profile-stat strong { font-size: 23px; }
+  .page { margin-top: 16px; margin-bottom: 40px; }
+  .post { margin: 14px 0; border-radius: 12px; }
+  .post-head { padding: 12px; gap: 8px; }
+  .post-head time { font-size: 11px; flex-shrink: 0; max-width: 100px; }
+  .post h2 { font-size: 16px; margin: 12px 12px 6px; overflow-wrap: anywhere; }
+  .post p { margin: 0 12px 14px; font-size: 13px; }
+  .post-media { width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
+  .user-link { min-width: 0; font-size: 14px; }
+  .avatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .stat { padding: 12px; }
+  .stat strong { font-size: 22px; }
+  .grade { padding: 8px 10px; }
+  .map-toolbar, .action-row, .field-row, .tracker-links { flex-wrap: wrap; }
+  .map-toolbar button, .action-row button { min-height: 42px; }
+  .map-container { max-width: 100%; }
+  .media-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 380px) {
+  .wrap { width: calc(100% - 20px); }
+  header .links a { font-size: 11px; padding: 8px 3px; }
+  .stats-grid { gap: 8px; }
+  .post-head time { max-width: 76px; }
+  .player-row { gap: 6px; }
+}
 </style></head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}

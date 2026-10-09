@@ -33,7 +33,64 @@ header .links a.active { background:#35b8b5; color:#081521; }
 @media(max-width:700px) { header .nav { flex-direction:column; align-items:flex-start; } header .links a { padding:10px 12px; font-size:13px; } }
 @media(max-width:480px) { .player-row { gap:10px; padding:12px; } .player-rank { font-size:19px; min-width:35px; } .player-avatar { width:42px; height:42px; flex-basis:42px; font-size:18px; } .player-name { font-size:16px; } .player-points { font-size:19px; } }
 </style>
-</head>
+<style id="mobile-responsive-upgrade">
+/* Mobile layout improvements — does not change Supabase or map coordinates. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, video { max-width: 100%; }
+.wrap { width: min(100% - 28px, 1160px); margin-left: auto; margin-right: auto; }
+header .links { min-width: 0; }
+header .links a { text-align: center; }
+button, input, select, textarea { max-width: 100%; }
+@media (max-width: 700px) {
+  header .nav { gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+  header .brand { font-size: 15px; }
+  header .links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; width: 100%; }
+  header .links a { display: flex; align-items: center; justify-content: center; min-height: 43px; padding: 8px 5px; font-size: 12px; line-height: 1.2; white-space: normal; }
+  h1 { font-size: clamp(26px,7vw,36px); }
+  .dashboard-links { gap: 9px; }
+  .dashboard-links a { flex: 1 1 145px; text-align: center; }
+  .dashboard-card, .profile-card { padding: 16px; }
+  .dashboard-table { font-size: 12px; }
+  .dashboard-table th, .dashboard-table td { padding: 9px 4px; }
+  .stat-card { padding: 15px 9px; }
+  .leaderboard-page { padding-top: 20px; }
+  .player-row { gap: 9px; padding: 12px 10px; }
+  .player-rank { min-width: 36px; font-size: 18px; }
+  .player-name { font-size: 15px; overflow-wrap: anywhere; }
+  .player-points { font-size: 19px; }
+  .profile-top { align-items: flex-start; }
+  .profile-name { overflow-wrap: anywhere; }
+  .profile-stats { gap: 9px; }
+  .profile-stat { padding: 13px; }
+  .profile-stat strong { font-size: 23px; }
+  .page { margin-top: 16px; margin-bottom: 40px; }
+  .post { margin: 14px 0; border-radius: 12px; }
+  .post-head { padding: 12px; gap: 8px; }
+  .post-head time { font-size: 11px; flex-shrink: 0; max-width: 100px; }
+  .post h2 { font-size: 16px; margin: 12px 12px 6px; overflow-wrap: anywhere; }
+  .post p { margin: 0 12px 14px; font-size: 13px; }
+  .post-media { width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
+  .user-link { min-width: 0; font-size: 14px; }
+  .avatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .stat { padding: 12px; }
+  .stat strong { font-size: 22px; }
+  .grade { padding: 8px 10px; }
+  .map-toolbar, .action-row, .field-row, .tracker-links { flex-wrap: wrap; }
+  .map-toolbar button, .action-row button { min-height: 42px; }
+  .map-container { max-width: 100%; }
+  .media-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 380px) {
+  .wrap { width: calc(100% - 20px); }
+  header .links a { font-size: 11px; padding: 8px 3px; }
+  .stats-grid { gap: 8px; }
+  .post-head time { max-width: 76px; }
+  .player-row { gap: 6px; }
+}
+</style></head>
 <body>
 <header><nav class="wrap nav">
 <a class="brand" href="index.html">⛰ CLIMB TRACKER</a>
@@ -87,7 +144,7 @@ async function loadLeaderboard() {
   list.replaceChildren();
   message.textContent = "Loading leaderboard...";
   try {
-    const view = currentPeriod === "monthly" ? "monthly_leaderboard" : "leaderboard";
+    const view = currentPeriod === "monthly" ? "monthly_leaderboard_flashes" : "leaderboard_flashes";
     const {data,error} = await supabaseClient.from(view).select("id, username, total_sends, points");
     if (error) throw error;
     const players = sortPlayers(data || []);
