@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard | Climb Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #101827;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      background: #374151;
+      padding: 12px 18px;
+      border-radius: 8px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 25px 0;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 14px;
+      background: #374151;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: #3979ff;
+    }
+    .player {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+    .rank {
+      font-size: 24px;
+      min-width: 40px;
+      text-align: center;
+    }
+    .player-info { flex: 1; min-width: 0; }
+    .player-name {
+      font-size: 18px;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+    .player-climbs {
+      color: #9ca3af;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .points {
+      font-size: 20px;
+      font-weight: bold;
+      color: #60a5fa;
+      white-space: nowrap;
+    }
+    .muted { color: #9ca3af; }
+    #status { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="track.html">Track Climbs</a>
+      <a href="profile.html">My Profile</a>
+    </nav>
+
+    <h1>Climber Leaderboard</h1>
+    <p class="muted">
+      See who's leading at Brushworks.
+    </p>
+
+    <div class="tabs">
+      <button id="monthlyBtn" class="active">
+        This Month
+      </button>
+      <button id="allTimeBtn">
+        All Time
+      </button>
+    </div>
+
+    <div id="players"></div>
+    <p id="status" role="status">Loading leaderboard...</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const players = document.getElementById("players");
+    const status = document.getElementById("status");
+    const monthlyBtn = document.getElementById("monthlyBtn");
+    const allTimeBtn = document.getElementById("allTimeBtn");
+
+    let currentPeriod = "monthly";
+
+    async function loadLeaderboard() {
+      const requestedPeriod = currentPeriod;
+      const view = requestedPeriod === "monthly"
+        ? "monthly_leaderboard"
+        : "leaderboard";
+
+      status.textContent = "Loading leaderboard...";
+      players.replaceChildren();
+
+      try {
+        const { data, error } = await supabaseClient
+          .from(view)
+          .select("id, username, total_sends, points")
+          .order("points", { ascending: false })
+          .order("total_sends", { ascending: false })
+          .order("username", { ascending: true });
+
+        if (error) throw error;
+        if (requestedPeriod !== currentPeriod) return;
+
+        status.textContent = "";
+
+        if (!data || data.length === 0) {
+          status.textContent =
+            "No climbers yet. Create a profile to join!";
+          return;
+        }
+
+        data.forEach((player, index) => {
+          const card = document.createElement("div");
+          card.className = "player";
+
+          const rank = document.createElement("div");
+          rank.className = "rank";
+          rank.textContent =
+            ["🥇", "🥈", "🥉"][index] || "#" + (index + 1);
+
+          const info = document.createElement("div");
+          info.className = "player-info";
+
+          const name = document.createElement("div");
+          name.className = "player-name";
+          name.textContent = player.username;
+
+          const climbs = document.createElement("div");
+          climbs.className = "player-climbs";
+          climbs.textContent =
+            player.total_sends + " climbs sent";
+
+          const points = document.createElement("div");
+          points.className = "points";
+          points.textContent = player.points + " pts";
+
+          info.append(name, climbs);
+          card.append(rank, info, points);
+          players.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          "Could not load leaderboard: " + error.message;
+      }
+    }
+
+    function selectPeriod(period) {
+      currentPeriod = period;
+
+      monthlyBtn.classList.toggle(
+        "active", period === "monthly"
+      );
+      allTimeBtn.classList.toggle(
+        "active", period === "all"
+      );
+
+      loadLeaderboard();
+    }
+
+    monthlyBtn.onclick = () => selectPeriod("monthly");
+    allTimeBtn.onclick = () => selectPeriod("all");
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>
