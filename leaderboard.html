@@ -22,6 +22,9 @@ header .links a.active { background:#35b8b5; color:#081521; }
 .player-avatar { width:54px; height:54px; flex:0 0 54px; border-radius:50%; background:#35b8b5; color:#081521; display:flex; align-items:center; justify-content:center; font-size:23px; font-weight:800; overflow:hidden; }
 .player-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .player-info { flex:1; min-width:0; }
+.player-profile-link { display:flex; align-items:center; gap:18px; flex:1; min-width:0; color:inherit; text-decoration:none; border-radius:8px; }
+.player-profile-link:hover .player-name { color:#66d9d5; text-decoration:underline; }
+.player-profile-link:focus-visible { outline:2px solid #66d9d5; outline-offset:4px; }
 .player-name { font-weight:800; font-size:19px; color:white; overflow-wrap:anywhere; }
 .player-climbs { color:#94a3b8; margin-top:6px; }
 .player-points { color:#66d9d5; font-size:24px; font-weight:800; text-align:right; flex-shrink:0; }
@@ -126,7 +129,12 @@ async function loadLeaderboard() {
       const label = document.createElement("small");
       label.textContent = "points";
       points.appendChild(label);
-      row.append(rank,avatar,info,points);
+      const profileLink = document.createElement("a");
+      profileLink.className = "player-profile-link";
+      profileLink.href = "climber.html?id=" + encodeURIComponent(player.id);
+      profileLink.setAttribute("aria-label", "View " + (player.username || "climber") + "'s profile");
+      profileLink.append(avatar,info);
+      row.append(rank,profileLink,points);
       fragment.appendChild(row);
     });
     list.appendChild(fragment);
