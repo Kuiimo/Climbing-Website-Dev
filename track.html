@@ -597,6 +597,12 @@
         <p id="climbMediaStatus" class="muted" role="status"></p>
       </div>
       <div class="action-row">
+        <div id="attemptsBox" style="width:100%;padding:12px 0">
+          <label for="attemptCount" style="display:block;margin-bottom:8px;font-weight:700">How many attempts did it take?</label>
+          <input id="attemptCount" type="number" min="1" max="999" step="1" value="2"
+                 style="width:110px;padding:11px;border-radius:8px;border:1px solid #64748b;background:#101827;color:white">
+          <p class="muted" style="margin:8px 0 0">1 attempt = FLASH ⚡ (+2 bonus points). More than 1 = normal send.</p>
+        </div>
         <button id="sendBtn" class="success">
           Mark as Sent
         </button>
@@ -1691,7 +1697,7 @@
         climb.colour.slice(1);
 
       $("climbInfo").textContent =
-        climb.grade + " points per send";
+        climb.grade + " base points · Flash (first try) earns +2 bonus points";
 
       const sent = mySends.has(climb.id);
 
@@ -1699,6 +1705,8 @@
         "hidden",
         sent
       );
+      $("attemptsBox").classList.toggle("hidden", sent);
+      $("attemptCount").value = "2";
 
       $("removeSendBtn").classList.toggle(
         "hidden",
@@ -1730,7 +1738,7 @@
         await supabaseClient
           .from("sends")
           .select(
-            "user_id, profiles(username)"
+            "user_id, attempts, profiles(username)"
           )
           .eq("climb_id", climbId);
 
@@ -1764,9 +1772,10 @@
         const item =
           document.createElement("li");
 
-        item.textContent =
-          send.profiles?.username ||
-          "Unknown climber";
+        const climberName = send.profiles?.username || "Unknown climber";
+        item.textContent = climberName + (send.attempts === 1
+          ? " — ⚡ FLASH (1 attempt)"
+          : " — " + send.attempts + " attempts");
 
         list.appendChild(item);
       });
@@ -1849,6 +1858,11 @@
 
       const climb = selectedClimb;
       const button = $("sendBtn");
+      const attempts = Number($("attemptCount").value);
+      if (!Number.isInteger(attempts) || attempts < 1 || attempts > 999) {
+        message("Enter a whole number of attempts between 1 and 999.");
+        return;
+      }
 
       busy = true;
       button.disabled = true;
@@ -1858,7 +1872,8 @@
           .from("sends")
           .insert({
             user_id: currentUser.id,
-            climb_id: climb.id
+            climb_id: climb.id,
+            attempts: attempts
           });
 
         if (error) throw error;
@@ -1870,8 +1885,9 @@
         await loadAudit();
 
         message(
-          "Send recorded! You earned " +
-          climb.grade + " points."
+          (attempts === 1 ? "⚡ FLASH! " : "Send recorded! ") +
+          "You earned " + (Number(climb.grade) + (attempts === 1 ? 2 : 0)) +
+          " points (" + attempts + (attempts === 1 ? " attempt)." : " attempts).")
         );
 
       } catch (error) {
