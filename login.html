@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login | Climb Tracker</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
     .auth-box {
       max-width: 420px;
@@ -13,6 +14,7 @@
       background: #1f2937;
       border-radius: 14px;
     }
+
     .auth-box input {
       box-sizing: border-box;
       width: 100%;
@@ -23,6 +25,7 @@
       background: #111827;
       color: white;
     }
+
     .auth-box button {
       padding: 12px 20px;
       margin: 8px 4px 8px 0;
@@ -32,19 +35,36 @@
       color: white;
       cursor: pointer;
     }
-    #message { margin-top: 15px; }
+
+    .auth-box button:hover {
+      background: #2563eb;
+    }
+
+    #message {
+      margin-top: 15px;
+      color: #bfdbfe;
+    }
   </style>
 </head>
+
 <body>
   <div class="auth-box">
     <h1>Climb Tracker</h1>
     <h2>User Login</h2>
 
-    <input id="email" type="email"
-      placeholder="Email address" autocomplete="email">
+    <input
+      id="email"
+      type="email"
+      placeholder="Email address"
+      autocomplete="email"
+    >
 
-    <input id="password" type="password"
-      placeholder="Password" autocomplete="current-password">
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password"
+    >
 
     <div>
       <button id="loginBtn">Log In</button>
@@ -54,10 +74,16 @@
     <p id="message" role="status"></p>
   </div>
 
+  <!-- Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Your Supabase connection -->
   <script src="supabase-config.js"></script>
+
   <script>
     const message = document.getElementById("message");
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
 
     function credentials() {
       return {
@@ -66,28 +92,73 @@
       };
     }
 
-    document.getElementById("signupBtn").onclick = async () => {
+    // Sign up a new climber
+    signupBtn.onclick = async () => {
       message.textContent = "Creating account...";
-      const { error } = await supabaseClient.auth.signUp({
-        ...credentials(),
-        options: {
-          emailRedirectTo: window.location.href
+
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          ...credentials(),
+          options: {
+            emailRedirectTo: window.location.href
+          }
+        });
+
+        if (error) {
+          message.textContent = error.message;
+          return;
         }
-      });
-      message.textContent = error
-        ? error.message
-        : "Check your email to confirm your account, if required. Then log in.";
+
+        if (data.session) {
+          window.location.href = "index.html";
+        } else {
+          message.textContent =
+            "Check your email to confirm your account. Then log in.";
+        }
+
+      } catch (err) {
+        message.textContent = "Connection error: " + err.message;
+      }
     };
 
-    document.getElementById("loginBtn").onclick = async () => {
+    // Log in an existing climber
+    loginBtn.onclick = async () => {
       message.textContent = "Logging in...";
-      const { error } = await supabaseClient.auth.signInWithPassword(
-        credentials()
-      );
-      message.textContent = error
-        ? error.message
-        : "Logged in successfully!";
+
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword(
+          credentials()
+        );
+
+        if (error) {
+          message.textContent = error.message;
+          return;
+        }
+
+        message.textContent = "Logged in! Redirecting...";
+
+        // Take the user to the homepage
+        window.location.href = "index.html";
+
+      } catch (err) {
+        message.textContent = "Connection error: " + err.message;
+      }
     };
+
+    // Redirect users who are already logged in
+    async function checkLogin() {
+      try {
+        const { data, error } = await supabaseClient.auth.getUser();
+
+        if (!error && data.user) {
+          window.location.href = "index.html";
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    }
+
+    checkLogin();
   </script>
 </body>
 </html>
