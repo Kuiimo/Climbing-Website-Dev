@@ -1,164 +1,464 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login | Climb Tracker</title>
+  <title>Climb Tracker | Login</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
-    .auth-box {
-      max-width: 420px;
-      margin: 80px auto;
-      padding: 30px;
-      background: #1f2937;
-      border-radius: 14px;
+    body {
+      margin: 0;
+      background: #101827;
+      color: #f8fafc;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
     }
 
-    .auth-box input {
+    header {
+      background: #142133;
+      border-bottom: 1px solid #334155;
+    }
+
+    header .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    header .brand {
+      color: #66d9d5;
+      font-size: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .login-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 180px);
+      padding: 40px 20px;
       box-sizing: border-box;
+    }
+
+    .login-card {
+      background: #1f2937;
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 36px;
+      width: 100%;
+      max-width: 420px;
+      box-sizing: border-box;
+      box-shadow: 0 16px 40px #0003;
+    }
+
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: #143d46;
+      color: #66d9d5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin: 0 0 12px;
+      font-size: 32px;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin: 0 0 28px;
+    }
+
+    .login-field {
+      margin-bottom: 18px;
+    }
+
+    .login-field label {
+      display: block;
+      margin-bottom: 9px;
+      font-weight: 700;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .login-field input {
+      display: block;
       width: 100%;
       padding: 14px;
-      margin: 10px 0;
+      background: #101827;
       border: 1px solid #475569;
-      border-radius: 8px;
-      background: #111827;
-      color: white;
+      border-radius: 9px;
+      color: #f8fafc;
+      font-size: 15px;
+      box-sizing: border-box;
     }
 
-    .auth-box button {
-      padding: 12px 20px;
-      margin: 8px 4px 8px 0;
-      background: #3979ff;
-      border: 0;
-      border-radius: 8px;
-      color: white;
+    .login-field input:focus {
+      outline: 2px solid #35b8b5;
+      border-color: #35b8b5;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-right: 75px;
+    }
+
+    .show-password {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: #66d9d5;
       cursor: pointer;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 700;
     }
 
-    .auth-box button:hover {
-      background: #2563eb;
+    .login-button {
+      display: block;
+      width: 100%;
+      background: #35b8b5;
+      color: #081521;
+      border: none;
+      border-radius: 9px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 12px;
     }
 
-    #message {
-      margin-top: 15px;
-      color: #bfdbfe;
+    .login-button:hover {
+      background: #66d9d5;
+    }
+
+    .login-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .switch-mode {
+      text-align: center;
+      margin-top: 24px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .text-button {
+      background: none;
+      border: none;
+      color: #66d9d5;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .text-button:hover {
+      text-decoration: underline;
+    }
+
+    #authMessage {
+      min-height: 22px;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    #authMessage.error {
+      color: #fca5a5;
+    }
+
+    #authMessage.success {
+      color: #86efac;
+    }
+
+    .login-footer {
+      text-align: center;
+      padding: 20px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 26px 20px;
+      }
+
+      .login-card h1 {
+        font-size: 28px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="auth-box">
-    <h1>Climb Tracker</h1>
-    <h2>User Login</h2>
 
-    <input
-      id="email"
-      type="email"
-      placeholder="Email address"
-      autocomplete="email"
-    >
+  <header>
+    <nav class="wrap nav">
+      <a class="brand" href="index.html">
+        ⛰ CLIMB TRACKER
+      </a>
+    </nav>
+  </header>
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-    >
+  <main class="login-main">
+    <section class="login-card">
 
-    <div>
-      <button id="loginBtn">Log In</button>
-      <button id="signupBtn">Sign Up</button>
-    </div>
+      <div class="login-icon">⛰</div>
 
-    <p id="message" role="status"></p>
-  </div>
+      <h1 id="authHeading">Welcome Back</h1>
 
-  <!-- Supabase library -->
+      <p id="authSubtitle" class="login-subtitle">
+        Log in to track your climbs, record your sends,
+        and compete with friends.
+      </p>
+
+      <form id="authForm">
+
+        <div class="login-field">
+          <label for="emailInput">Email Address</label>
+
+          <input
+            id="emailInput"
+            type="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="login-field">
+          <label for="passwordInput">Password</label>
+
+          <div class="password-wrap">
+            <input
+              id="passwordInput"
+              type="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              minlength="6"
+              required
+            >
+
+            <button
+              type="button"
+              class="show-password"
+              id="showPasswordBtn"
+            >
+              Show
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          id="submitBtn"
+          class="login-button"
+        >
+          Log In
+        </button>
+
+      </form>
+
+      <div class="switch-mode">
+        <span id="switchPrompt">
+          Don't have an account?
+        </span>
+
+        <button
+          type="button"
+          class="text-button"
+          id="switchModeBtn"
+        >
+          Sign Up
+        </button>
+      </div>
+
+      <p id="authMessage" role="status"></p>
+
+    </section>
+  </main>
+
+  <footer class="login-footer">
+    Made for the Brushworks climbing crew ·
+    Unofficial fan project
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Your Supabase connection -->
   <script src="supabase-config.js"></script>
 
   <script>
-    const message = document.getElementById("message");
-    const loginBtn = document.getElementById("loginBtn");
-    const signupBtn = document.getElementById("signupBtn");
+    let isSignUp = false;
+    let isBusy = false;
 
-    function credentials() {
-      return {
-        email: document.getElementById("email").value.trim(),
-        password: document.getElementById("password").value
-      };
+    const authForm = document.getElementById("authForm");
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const switchModeBtn = document.getElementById("switchModeBtn");
+    const showPasswordBtn = document.getElementById("showPasswordBtn");
+    const authMessage = document.getElementById("authMessage");
+
+    function setAuthMessage(message, type = "") {
+      authMessage.textContent = message;
+      authMessage.className = type;
     }
 
-    // Sign up a new climber
-    signupBtn.onclick = async () => {
-      message.textContent = "Creating account...";
+    function updateAuthMode() {
+      document.getElementById("authHeading").textContent =
+        isSignUp ? "Join Climb Tracker" : "Welcome Back";
 
-      try {
-        const { data, error } = await supabaseClient.auth.signUp({
-          ...credentials(),
-          options: {
-            emailRedirectTo: window.location.href
-          }
-        });
+      document.getElementById("authSubtitle").textContent =
+        isSignUp
+          ? "Create an account to start tracking your climbs and competing with friends."
+          : "Log in to track your climbs, record your sends, and compete with friends.";
 
-        if (error) {
-          message.textContent = error.message;
-          return;
-        }
+      submitBtn.textContent =
+        isSignUp ? "Create Account" : "Log In";
 
-        if (data.session) {
-          window.location.href = "index.html";
-        } else {
-          message.textContent =
-            "Check your email to confirm your account. Then log in.";
-        }
+      document.getElementById("switchPrompt").textContent =
+        isSignUp
+          ? "Already have an account?"
+          : "Don't have an account?";
 
-      } catch (err) {
-        message.textContent = "Connection error: " + err.message;
-      }
-    };
+      switchModeBtn.textContent =
+        isSignUp ? "Log In" : "Sign Up";
 
-    // Log in an existing climber
-    loginBtn.onclick = async () => {
-      message.textContent = "Logging in...";
+      passwordInput.autocomplete =
+        isSignUp ? "new-password" : "current-password";
 
-      try {
-        const { error } = await supabaseClient.auth.signInWithPassword(
-          credentials()
+      setAuthMessage("");
+    }
+
+    switchModeBtn.addEventListener("click", () => {
+      if (isBusy) return;
+
+      isSignUp = !isSignUp;
+      updateAuthMode();
+    });
+
+    showPasswordBtn.addEventListener("click", () => {
+      const hidden = passwordInput.type === "password";
+
+      passwordInput.type = hidden ? "text" : "password";
+      showPasswordBtn.textContent = hidden ? "Hide" : "Show";
+    });
+
+    authForm.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (isBusy) return;
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        setAuthMessage(
+          "Please enter your email and password.",
+          "error"
         );
+        return;
+      }
 
-        if (error) {
-          message.textContent = error.message;
-          return;
+      isBusy = true;
+      submitBtn.disabled = true;
+      switchModeBtn.disabled = true;
+
+      setAuthMessage(
+        isSignUp ? "Creating your account..." : "Logging in..."
+      );
+
+      try {
+        if (isSignUp) {
+          const redirectUrl = new URL(
+            "login.html",
+            window.location.href
+          ).href;
+
+          const { data, error } =
+            await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                emailRedirectTo: redirectUrl
+              }
+            });
+
+          if (error) throw error;
+
+          if (data.session) {
+            window.location.replace("profile.html");
+            return;
+          }
+
+          setAuthMessage(
+            "Account created! Check your email for a confirmation link. After confirming, return here and log in.",
+            "success"
+          );
+
+        } else {
+          const { error } =
+            await supabaseClient.auth.signInWithPassword({
+              email,
+              password
+            });
+
+          if (error) throw error;
+
+          window.location.replace("index.html");
         }
 
-        message.textContent = "Logged in! Redirecting...";
+      } catch (error) {
+        console.error(error);
+        setAuthMessage(error.message, "error");
 
-        // Take the user to the homepage
-        window.location.href = "index.html";
-
-      } catch (err) {
-        message.textContent = "Connection error: " + err.message;
+      } finally {
+        isBusy = false;
+        submitBtn.disabled = false;
+        switchModeBtn.disabled = false;
       }
-    };
+    });
 
-    // Redirect users who are already logged in
-    async function checkLogin() {
+    async function checkExistingLogin() {
       try {
-        const { data, error } = await supabaseClient.auth.getUser();
+        const { data, error } =
+          await supabaseClient.auth.getUser();
 
         if (!error && data.user) {
-          window.location.href = "index.html";
+          window.location.replace("index.html");
         }
-      } catch (err) {
-        console.error("Session check failed:", err);
+
+      } catch (error) {
+        console.error(error);
       }
     }
 
-    checkLogin();
+    checkExistingLogin();
   </script>
+
 </body>
 </html>
