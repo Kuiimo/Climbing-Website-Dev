@@ -1,5 +1,486 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Climb Tracker | My Profile</title><link rel="stylesheet" href="style.css?v=9"><style>
-body{background:#0e1726;color:#e9f0f9;margin:0;font-family:system-ui,Arial,sans-serif}header{background:#142133;border-bottom:1px solid #334155}.wrap{max-width:1050px;margin:auto;padding:24px}nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.brand{font-weight:800;color:#66d9d5;text-decoration:none}.links{display:flex;gap:8px;flex-wrap:wrap}.links a{background:#24364d;color:white;text-decoration:none;padding:12px;border-radius:9px;font-weight:700}.links .active{background:#35b8b5;color:#081521}.card{background:#19283b;border:1px solid #334155;border-radius:16px;padding:20px;margin-top:18px}.muted{color:#9db0c8}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}.stat{background:#101b2c;border:1px solid #334155;border-radius:12px;padding:20px}.stat strong{display:block;color:#66d9d5;font-size:28px}.stat span{color:#a8b8cc}.grade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}.grade{background:#101b2c;border:1px solid #334155;border-radius:12px;padding:18px}.grade strong{display:block;font-size:24px;color:#66d9d5}.grade span{color:#c8d6e7}.grade small{display:block;color:#9db0c8;margin-top:4px}footer{padding:30px;text-align:center;color:#9db0c8}
-</style></head><body><header><nav class="wrap"><a class="brand" href="index.html">▲ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a class="active" href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a></div></nav></header><main class="wrap"><h1>My Profile</h1><p id="welcome" class="muted">Loading your profile...</p><section class="card"><h2>Your Climbing Stats</h2><div class="stats"><div class="stat"><strong id="total">—</strong><span>Climbs completed</span></div><div class="stat"><strong id="points">—</strong><span>Grade points</span></div><div class="stat"><strong id="highest">—</strong><span>Highest grade</span></div></div></section><section class="card"><h2>Completed by Grade</h2><p class="muted">Includes climbs removed from the active map, so your achievements are kept.</p><div id="grades" class="grade-grid"></div></section><p id="error" class="muted"></p></main><footer>Made for the Brushworks climbing crew · Unofficial fan project</footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
-(async()=>{try{const {data:{user},error:authError}=await supabaseClient.auth.getUser();if(authError||!user){location.replace('login.html');return}const [profile,sends]=await Promise.all([supabaseClient.from('profiles').select('username').eq('id',user.id).maybeSingle(),supabaseClient.from('sends').select('climb_id, climbs(grade)').eq('user_id',user.id)]);if(profile.error)throw profile.error;if(sends.error)throw sends.error;document.getElementById('welcome').textContent='Welcome, '+(profile.data?.username||'climber')+'!';const tally=Array(11).fill(0);let total=0,points=0,highest=-1;for(const send of sends.data||[]){const g=Number(send.climbs?.grade);if(Number.isInteger(g)&&g>=0&&g<=10){tally[g]++;total++;points+=g;highest=Math.max(highest,g)}}document.getElementById('total').textContent=total;document.getElementById('points').textContent=points;document.getElementById('highest').textContent=highest<0?'—':'V'+highest;const grid=document.getElementById('grades');for(let g=10;g>=0;g--){const box=document.createElement('div');box.className='grade';const name=document.createElement('strong');name.textContent='V'+g;const amount=document.createElement('span');amount.textContent=tally[g]+' completed';box.append(name,amount);grid.append(box)}}catch(e){document.getElementById('error').textContent='Could not load profile: '+e.message}})();
-</script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climb Tracker | My Profile</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+body {
+  background: #101827;
+  color: #f8fafc;
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+header {
+  background: #142133;
+  border-bottom: 1px solid #334155;
+}
+header .nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+header .brand {
+  color: #66d9d5;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+header .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+header .links a {
+  background: #24364d;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+header .links a.active {
+  background: #35b8b5;
+  color: #081521;
+}
+.profile-container {
+  max-width: 850px;
+  margin: 38px auto;
+}
+.profile-card {
+  background: #1f2937;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.avatar {
+  width: 68px;
+  height: 68px;
+  background: #35b8b5;
+  color: #081521;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.profile-name {
+  font-size: clamp(30px, 5vw, 48px);
+  margin: 0 0 8px;
+}
+.muted {
+  color: #94a3b8;
+}
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+.tabs button {
+  background: #374151;
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: #35b8b5;
+  color: #081521;
+  font-weight: 700;
+}
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.profile-stat {
+  background: #101827;
+  border-radius: 12px;
+  padding: 20px;
+}
+.profile-stat strong {
+  display: block;
+  color: #66d9d5;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.profile-stat span {
+  color: #94a3b8;
+}
+.profile-button {
+  display: inline-block;
+  background: #35b8b5;
+  color: #081521;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 18px;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+.logout-button {
+  background: #374151;
+  color: white;
+  margin-left: 8px;
+}
+#usernameSetup input {
+  display: block;
+  padding: 12px;
+  width: 100%;
+  max-width: 300px;
+  background: #101827;
+  color: white;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+#profileMessage {
+  color: #93c5fd;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  header .nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  header .links a {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .profile-container {
+    margin-top: 22px;
+  }
+}
+@media (max-width: 480px) {
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Completed climbs by grade */
+.grade-breakdown { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.grade-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 17px; background:#101827; border:1px solid #334155; border-radius:11px; }
+.grade-row strong { color:#66d9d5; font-size:19px; }
+.grade-row span { color:#e2e8f0; text-align:right; }
+@media(max-width:480px) { .grade-breakdown { grid-template-columns:1fr; } }
+</style>
+</head>
+
+<body>
+<header>
+  <nav class="wrap nav">
+    <a class="brand" href="index.html">⛰ CLIMB TRACKER</a>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="track.html">Track Climbs</a>
+      <a class="active" href="profile.html">My Profile</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap profile-container">
+  <section id="usernameSetup" class="profile-card" hidden>
+    <h1>Choose Your Username</h1>
+    <p class="muted">This is the name your friends will see on the leaderboard.</p>
+    <input id="usernameInput" type="text"
+           minlength="2" maxlength="24"
+           placeholder="Enter username">
+    <button id="saveUsernameBtn" class="profile-button">
+      Save Username
+    </button>
+  </section>
+
+  <div id="profileContent" hidden>
+    <section class="profile-card">
+      <div class="profile-top">
+        <div id="avatar" class="avatar">?</div>
+        <div>
+          <h1 id="profileName" class="profile-name">Loading...</h1>
+          <p class="muted">Brushworks Climber</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card">
+      <h2>My Climbing Stats</h2>
+
+      <div class="tabs">
+        <button id="monthlyTab" class="active">This Month</button>
+        <button id="allTimeTab">All Time</button>
+      </div>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <strong id="climbsSent">—</strong>
+          <span>Climbs Sent</span>
+        </div>
+        <div class="profile-stat">
+          <strong id="pointsEarned">—</strong>
+          <span>Points Earned</span>
+        </div>
+        <div class="profile-stat">
+          <strong id="leaderboardRank">—</strong>
+          <span>Leaderboard Rank</span>
+        </div>
+        <div class="profile-stat">
+          <strong id="hardestClimb">—</strong>
+          <span>Hardest Climb</span>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="profile-card">
+      <h2>Climbs Completed by Grade</h2>
+      <p class="muted" id="gradeBreakdownPeriod">Completed climbs this month, including archived climbs.</p>
+      <div id="gradeBreakdown" class="grade-breakdown" aria-live="polite"></div>
+    </section>
+
+    <section class="profile-card">
+      <h2>Keep Climbing!</h2>
+      <p class="muted">Record your sends to climb the leaderboard.</p>
+      <a class="profile-button" href="track.html">Track My Climbs</a>
+      <button id="logoutBtn" class="profile-button logout-button">
+        Log Out
+      </button>
+    </section>
+  </div>
+
+  <p id="profileMessage" role="status"></p>
+</main>
+
+<footer>
+  <div class="wrap">
+    Made for the Brushworks climbing crew · Unofficial fan project
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<script>
+let currentUser = null;
+let currentPeriod = "monthly";
+let profile = null;
+
+function profileMessage(message) {
+  document.getElementById("profileMessage").textContent = message;
+}
+
+function sortRows(rows) {
+  return [...rows].sort((a, b) =>
+    Number(b.points) - Number(a.points) ||
+    Number(b.total_sends) - Number(a.total_sends) ||
+    String(a.username).localeCompare(String(b.username))
+  );
+}
+
+function startOfUKMonth() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit"
+  }).formatToParts(new Date());
+
+  const year = Number(parts.find(p => p.type === "year").value);
+  const month = Number(parts.find(p => p.type === "month").value);
+
+  return { year, month };
+}
+
+function isCurrentUKMonth(timestamp) {
+  const current = startOfUKMonth();
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit"
+  }).formatToParts(new Date(timestamp));
+
+  return Number(parts.find(p => p.type === "year").value) === current.year &&
+         Number(parts.find(p => p.type === "month").value) === current.month;
+}
+
+async function loadStats() {
+  if (!currentUser) return;
+
+  try {
+    const view = currentPeriod === "monthly"
+      ? "monthly_leaderboard"
+      : "leaderboard";
+
+    const [leaderResult, sendsResult] = await Promise.all([
+      supabaseClient.from(view)
+        .select("id, username, total_sends, points"),
+
+      supabaseClient.from("sends")
+        .select("sent_at, climbs(grade)")
+        .eq("user_id", currentUser.id)
+    ]);
+
+    if (leaderResult.error) throw leaderResult.error;
+    if (sendsResult.error) throw sendsResult.error;
+
+    const rows = sortRows(leaderResult.data || []);
+    const mine = rows.find(row => row.id === currentUser.id);
+    const rank = rows.findIndex(row => row.id === currentUser.id) + 1;
+
+    const sends = (sendsResult.data || []).filter(send =>
+      currentPeriod === "allTime" || isCurrentUKMonth(send.sent_at)
+    );
+
+    const grades = sends
+      .map(send => send.climbs?.grade)
+      .filter(grade => grade !== null && grade !== undefined);
+
+    document.getElementById("climbsSent").textContent =
+      mine ? mine.total_sends : "0";
+
+    document.getElementById("pointsEarned").textContent =
+      mine ? mine.points : "0";
+
+    document.getElementById("leaderboardRank").textContent =
+      rank > 0 ? "#" + rank : "—";
+
+    document.getElementById("hardestClimb").textContent =
+      grades.length ? "V" + Math.max(...grades) : "—";
+
+    // Use the same sends and date range as the existing stats.
+    // Archived climbs still count because their database records remain.
+    const gradeCounts = Array(11).fill(0);
+    grades.forEach(value => {
+      const grade = Number(value);
+      if (Number.isInteger(grade) && grade >= 0 && grade <= 10) {
+        gradeCounts[grade]++;
+      }
+    });
+    document.getElementById("gradeBreakdownPeriod").textContent =
+      currentPeriod === "monthly"
+        ? "Completed climbs this month, including archived climbs."
+        : "All your completed climbs, including archived climbs.";
+    const gradeContainer = document.getElementById("gradeBreakdown");
+    gradeContainer.replaceChildren();
+    for (let grade = 0; grade <= 10; grade++) {
+      const row = document.createElement("div");
+      row.className = "grade-row";
+      const label = document.createElement("strong");
+      label.textContent = "V" + grade;
+      const total = document.createElement("span");
+      total.textContent = gradeCounts[grade] + " completed";
+      row.append(label, total);
+      gradeContainer.appendChild(row);
+    }
+
+  } catch (error) {
+    console.error(error);
+    profileMessage("Could not load stats: " + error.message);
+  }
+}
+
+async function initialiseProfile() {
+  try {
+    const auth = await supabaseClient.auth.getUser();
+
+    if (auth.error || !auth.data.user) {
+      location.replace("login.html");
+      return;
+    }
+
+    currentUser = auth.data.user;
+
+    const result = await supabaseClient.from("profiles")
+      .select("id, username")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (result.error) throw result.error;
+
+    if (!result.data) {
+      document.getElementById("usernameSetup").hidden = false;
+      return;
+    }
+
+    profile = result.data;
+    document.getElementById("profileContent").hidden = false;
+    document.getElementById("profileName").textContent = profile.username;
+    document.getElementById("avatar").textContent =
+      profile.username.charAt(0).toUpperCase();
+
+    await loadStats();
+
+  } catch (error) {
+    console.error(error);
+    profileMessage("Could not load profile: " + error.message);
+  }
+}
+
+document.getElementById("saveUsernameBtn").onclick = async () => {
+  const username = document.getElementById("usernameInput").value.trim();
+
+  if (username.length < 2 || username.length > 24) {
+    profileMessage("Username must be between 2 and 24 characters.");
+    return;
+  }
+
+  const button = document.getElementById("saveUsernameBtn");
+  button.disabled = true;
+
+  try {
+    const { error } = await supabaseClient.from("profiles")
+      .insert({ id: currentUser.id, username });
+
+    if (error) throw error;
+
+    location.reload();
+
+  } catch (error) {
+    profileMessage("Could not save username: " + error.message);
+    button.disabled = false;
+  }
+};
+
+document.getElementById("monthlyTab").onclick = async () => {
+  currentPeriod = "monthly";
+  document.getElementById("monthlyTab").classList.add("active");
+  document.getElementById("allTimeTab").classList.remove("active");
+  await loadStats();
+};
+
+document.getElementById("allTimeTab").onclick = async () => {
+  currentPeriod = "allTime";
+  document.getElementById("allTimeTab").classList.add("active");
+  document.getElementById("monthlyTab").classList.remove("active");
+  await loadStats();
+};
+
+document.getElementById("logoutBtn").onclick = async () => {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+    profileMessage("Could not log out: " + error.message);
+  } else {
+    location.replace("login.html");
+  }
+};
+
+initialiseProfile();
+</script>
+</body>
+</html>
