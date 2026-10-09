@@ -55,9 +55,10 @@ header .links a:hover { opacity:.9; }
 </style>
 </head>
 <body>
-<header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a class="active" href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a></div></nav></header>
+<header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a class="active" href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a>
+      <a href="gallery.html">Gallery</a><a href="leaderboard.html">Leaderboard</a></div></nav></header>
 <main class="wrap">
-<section class="hero"><h1 id="welcomeHeading">Welcome, climbers.</h1><p>Track your climbs.</p><div class="dashboard-links"><a class="button" href="track.html">Explore the gym map →</a><a class="secondary-link" href="profile.html">My Profile</a><a class="secondary-link" href="leaderboard.html">Full Leaderboard</a></div></section>
+<section class="hero"><h1 id="welcomeHeading">Welcome, climbers.</h1><p>Track your climbs.</p><div class="dashboard-links"><a class="button" href="track.html">Explore the gym map →</a><a class="secondary-link" href="profile.html">My Profile</a><a class="secondary-link" href="leaderboard.html">Full Leaderboard</a><a class="secondary-link" href="gallery.html">Climbing Gallery →</a></div></section>
 <h2 class="dashboard-heading">Your Stats This Month</h2>
 <div class="stats-grid"><div class="stat-card"><div id="myClimbs" class="stat-number">—</div><div class="stat-label">Climbs Sent</div></div><div class="stat-card"><div id="myPoints" class="stat-number">—</div><div class="stat-label">Points Earned</div></div><div class="stat-card"><div id="myRank" class="stat-number">—</div><div class="stat-label">Monthly Rank</div></div></div>
 <h2 class="dashboard-heading">Climbing Leaderboards</h2>
@@ -65,7 +66,9 @@ header .links a:hover { opacity:.9; }
 <section class="dashboard-card"><h3>This Month</h3><p>Points from sends logged this month.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Points</th></tr></thead><tbody id="monthlyLeaderboard"><tr><td colspan="4">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
 <section class="dashboard-card"><h3>All Time</h3><p>Total points across all recorded sends.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Points</th></tr></thead><tbody id="allTimeLeaderboard"><tr><td colspan="4">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
 </div>
-<!-- Only new dashboard section -->
+<h2 class="dashboard-heading">Climbing Gallery</h2>
+<section class="dashboard-card"><h3>Photos &amp; Videos from the Wall</h3><p>See climbs completed by the Brushworks crew, watch videos and visit climber profiles.</p><a class="leaderboard-footer" href="gallery.html">View full gallery →</a></section>
+<!-- Current gym map -->
 <h2 class="dashboard-heading">Current Gym Map</h2>
 <section class="dashboard-card" aria-label="Read-only current gym map">
 <p>See the climbs currently on the wall. This map is view-only — use Track Climbs to add, edit or log a send.</p>
