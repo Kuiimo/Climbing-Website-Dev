@@ -623,7 +623,6 @@ footer {
     padding-bottom: 40px;
   }
 
-  /* Two-column navigation */
   header .nav {
     display: flex;
     flex-direction: column;
@@ -673,7 +672,6 @@ footer {
     padding: 18px 0 24px;
   }
 
-  /* Homepage buttons */
   .dashboard-links {
     display: grid;
     grid-template-columns: 1fr;
@@ -688,7 +686,6 @@ footer {
     text-align: center;
   }
 
-  /* Homepage stats */
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
@@ -710,7 +707,6 @@ footer {
     font-size: 13px;
   }
 
-  /* Stack leaderboards */
   .leaderboard-grid {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -729,7 +725,6 @@ footer {
     padding: 10px 5px;
   }
 
-  /* Profile */
   .profile-container {
     margin-top: 20px;
   }
@@ -754,7 +749,6 @@ footer {
     font-size: 25px;
   }
 
-  /* Leaderboard */
   .player-row {
     padding: 14px;
     gap: 10px;
@@ -773,7 +767,6 @@ footer {
     font-size: 21px;
   }
 
-  /* Map */
   .map-container {
     width: 100%;
   }
@@ -810,7 +803,6 @@ footer {
     min-height: 46px;
   }
 
-  /* Login */
   .login-main {
     min-height: auto;
     padding: 28px 16px;
@@ -885,4 +877,41 @@ footer {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* =========================================
+   BIGGER DESKTOP TRACKER MAP
+   ========================================= */
+
+@media (min-width: 769px) {
+
+  /* Make the tracker page nearly full-width,
+     without changing other pages. */
+  body:has(#mapViewport) main.wrap {
+    width: 96%;
+    max-width: 1600px;
+  }
+
+  /* Use most of the desktop screen height.
+     The whole gym map still fits at 100%. */
+  #mapViewport {
+    height: 85vh;
+    min-height: 650px;
+    max-height: none;
+  }
+
+}
+
+/* =========================================
+   MOBILE TRACKER MAP
+   ========================================= */
+
+@media (max-width: 768px) {
+
+  #mapViewport {
+    height: 65vh;
+    min-height: 350px;
+    max-height: 650px;
+  }
+
 }
