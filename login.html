@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | Brushworks Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-box {
+      max-width: 420px;
+      margin: 80px auto;
+      padding: 30px;
+      background: #1f2937;
+      border-radius: 14px;
+    }
+    .auth-box input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      background: #111827;
+      color: white;
+    }
+    .auth-box button {
+      padding: 12px 20px;
+      margin: 8px 4px 8px 0;
+      background: #3979ff;
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    #message { margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <h1>Brushworks Tracker</h1>
+    <h2>Climber Login</h2>
+
+    <input id="email" type="email"
+      placeholder="Email address" autocomplete="email">
+
+    <input id="password" type="password"
+      placeholder="Password" autocomplete="current-password">
+
+    <div>
+      <button id="loginBtn">Log In</button>
+      <button id="signupBtn">Sign Up</button>
+    </div>
+
+    <p id="message" role="status"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    const message = document.getElementById("message");
+
+    function credentials() {
+      return {
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value
+      };
+    }
+
+    document.getElementById("signupBtn").onclick = async () => {
+      message.textContent = "Creating account...";
+      const { error } = await supabaseClient.auth.signUp({
+        ...credentials(),
+        options: {
+          emailRedirectTo: window.location.href
+        }
+      });
+      message.textContent = error
+        ? error.message
+        : "Check your email to confirm your account, if required. Then log in.";
+    };
+
+    document.getElementById("loginBtn").onclick = async () => {
+      message.textContent = "Logging in...";
+      const { error } = await supabaseClient.auth.signInWithPassword(
+        credentials()
+      );
+      message.textContent = error
+        ? error.message
+        : "Logged in successfully!";
+    };
+  </script>
+</body>
+</html>
