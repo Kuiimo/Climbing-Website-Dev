@@ -153,7 +153,13 @@ button, input, select, textarea { max-width: 100%; }
 .period-date-range input[type=date]{width:100%;min-width:0;min-height:44px;padding:9px;color:#fff;background:#24364d;border:1px solid #64748b;border-radius:9px;color-scheme:dark;font:inherit}
 .period-date-range button{min-height:44px;padding:10px 18px;background:#35b8b5;color:#081521;border:0;border-radius:9px;font-weight:700;cursor:pointer}
 @media(max-width:600px){.period-date-range{padding:10px;gap:8px}.period-date-range label{flex-basis:120px}.period-date-range button{width:100%}}
-</style></head>
+</style><link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#142133">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Climb Tracker">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+</head>
 <body>
 <header><nav class="wrap nav">
 <a class="brand" href="index.html">⛰ CLIMB TRACKER</a>
@@ -310,5 +316,14 @@ async function initialiseLeaderboard() {
 }
 initialiseLeaderboard();
 </script>
-<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html" aria-current="page"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav></body>
+<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html" aria-current="page"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function (error) {
+      console.warn('App offline support unavailable:', error);
+    });
+  });
+}
+</script>
+</body>
 </html>

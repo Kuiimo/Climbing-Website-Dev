@@ -512,7 +512,13 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style></head>
+</style><link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#142133">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Climb Tracker">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+</head>
 
 <body>
   <header>
@@ -2245,5 +2251,14 @@ button, input, select, textarea { max-width: 100%; }
     loadClimbs = async function() { await originalLoadClimbs(); await loadAudit(); };
     initialiseTracker();
   </script>
-<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html" aria-current="page"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav></body>
+<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html" aria-current="page"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function (error) {
+      console.warn('App offline support unavailable:', error);
+    });
+  });
+}
+</script>
+</body>
 </html>

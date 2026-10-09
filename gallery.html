@@ -123,6 +123,12 @@ button, input, select, textarea { max-width: 100%; }
   .post-media { width:100%!important; height:auto!important; max-height:min(58svh,440px)!important; object-fit:contain!important; }
 }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#142133">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Climb Tracker">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}
@@ -139,4 +145,13 @@ let offset=0;const PAGE=18;let loading=false,done=false;
 async function loadMore(){if(loading||done)return;loading=true;$('more').disabled=true;$('status').textContent='Loading posts...';try{const {data,error}=await supabaseClient.from('climb_media').select('id,climb_id,user_id,storage_path,media_type,created_at').order('created_at',{ascending:false}).range(offset,offset+PAGE-1);if(error)throw error;offset+=(data||[]).length;const profiles=await getProfiles([...new Set((data||[]).map(x=>x.user_id))]);const climbs=await getClimbs([...new Set((data||[]).map(x=>x.climb_id))]);let count=0;for(const item of data||[]){const card=renderPost(item,profiles,climbs);if(card){$('feed').append(card);count++}}if((data||[]).length<PAGE)done=true;$('more').hidden=done;$('status').textContent=done?($('feed').children.length?'You are all caught up!':'No uploads yet. Complete a climb and add a photo or video on the tracker!'):'';}catch(e){console.error(e);$('status').textContent='Could not load gallery: '+e.message;$('more').hidden=false}finally{loading=false;$('more').disabled=false}}
 $('more').onclick=loadMore;
 (async()=>{const {data}=await supabaseClient.auth.getUser();if(!data.user){location.replace('login.html');return}await loadMore()})();
-</script><nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html" aria-current="page"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav></body></html>
+</script><nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html" aria-current="page"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function (error) {
+      console.warn('App offline support unavailable:', error);
+    });
+  });
+}
+</script>
+</body></html>
