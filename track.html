@@ -386,15 +386,14 @@
       }
     }
 
-    /* Wall selection highlights; markers stay their original size. */
-    #wallOverlay { position:absolute; left:0; top:0; pointer-events:none; overflow:visible; z-index:1; }
-    #wallOverlay polygon { fill:#4de0d5; fill-opacity:.04; stroke:transparent; stroke-width:.45; vector-effect:non-scaling-stroke; }
-    #wallOverlay polygon.hovered, #wallOverlay polygon.selected { fill-opacity:.32; stroke:#6ef9e7; stroke-width:2; }
-    #wallOverlay polygon.selected { fill-opacity:.40; }
-    #wallModeBtn { font-size:14px; background:#334155; }
+    /* Drag-to-select area, independent of map zoom. */
     #wallModeBtn.active { background:#35b8b5; color:#081521; }
+    #selectionBox { position:absolute; display:none; z-index:10; pointer-events:none;
+      border:2px solid #65f4e5; background:rgba(53,184,181,.22); box-sizing:border-box; }
+    .climb-marker.area-selected { outline:3px solid #65f4e5; outline-offset:3px; z-index:7; }
     #wallPanel { border:1px solid #35b8b5; }
     #wallPanel .danger { background:#b91c1c; color:white; }
+    #mapViewport.area-mode { cursor:crosshair; }
   </style>
 </head>
 
@@ -482,8 +481,8 @@
         <span id="gradeFilterCount" class="muted" aria-live="polite"></span>
       </div>
       <div class="map-toolbar">
-        <button type="button" id="wallModeBtn" class="zoom-button">Select Wall</button>
-        <span id="wallModeHint" class="muted">Switch on to highlight and reset individual wall faces.</span>
+        <button type="button" id="wallModeBtn" class="zoom-button">Select Area</button>
+        <span id="wallModeHint" class="muted">Drag a rectangle around the climb markers you want to remove.</span>
       </div>
       <div id="mapViewport" class="map-viewport">
         <div id="mapContainer" class="map-container">
@@ -494,13 +493,14 @@
             draggable="false"
           >
 
-          <svg id="wallOverlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          
 
           <div
             id="previewMarker"
             class="preview-marker hidden"
           >+</div>
         </div>
+        <div id="selectionBox" aria-hidden="true"></div>
       </div>
 
       <p class="muted">
@@ -510,11 +510,11 @@
     </section>
 
     <section id="wallPanel" class="tracker-panel hidden">
-      <h2 id="wallTitle">Wall</h2>
+      <h2 id="wallTitle">Selected Climbs</h2>
       <p id="wallDescription" class="muted"></p>
       <div class="action-row">
-        <button id="resetWallBtn" class="danger">Reset Wall</button>
-        <button id="closeWallBtn" class="secondary">Close</button>
+        <button id="resetWallBtn" class="danger">Remove Selected Climbs</button>
+        <button id="closeWallBtn" class="secondary">Cancel Selection</button>
       </div>
     </section>
 
@@ -691,97 +691,90 @@
     };
 
 
-    /* Wall face boundaries are approximate outlines of the current map.
-       Purple is intentionally not selectable/resettable. */
-    const WALLS = [{"id":"B01","name":"Upper beige wall","points":[[1.3169,9.839],[48.7243,9.839],[43.0453,19.2308],[33.1687,14.2218],[22.0576,17.8891],[8.4774,14.1324],[1.3169,24.9553]]},{"id":"T03","name":"Upper teal wall","points":[[48.7243,9.839],[98.4362,9.839],[98.4362,12.4329],[89.5473,12.5224],[76.2963,19.4097],[73.3333,23.7925],[48.9712,22.1825],[43.0453,19.2308]]},{"id":"T04","name":"Left teal wall","points":[[1.3169,24.9553],[4.5267,23.0769],[4.5267,30.4114],[6.1728,36.941],[4.5267,46.9589],[4.5267,66.1896],[11.2757,75.1342],[1.3169,80.7692]]},{"id":"B02","name":"Lower-left beige wall","points":[[1.3169,80.7692],[11.2757,75.1342],[11.2757,88.7299],[21.1523,88.7299],[24.4444,86.6726],[31.9342,86.6726],[35.3909,97.8533],[1.3169,97.8533]]},{"id":"B03","name":"Centre island beige","points":[[26.3374,30.4114],[31.9342,29.6959],[36.3786,32.2004],[37.6955,35.7782],[52.9218,52.7728],[54.1564,62.1646],[51.9342,64.7585]]},{"id":"T06","name":"Centre island teal","points":[[26.3374,30.4114],[51.9342,64.7585],[49.3827,67.5313],[33.5802,59.9284],[25.4321,45.4383]]},{"id":"B04","name":"Right island beige","points":[[70.6173,52.5939],[91.1111,34.4365],[96.5432,38.0143],[74.8971,64.7585],[72.2634,61.3596]]},{"id":"T07","name":"Right island teal","points":[[74.8971,64.7585],[96.5432,38.0143],[97.037,41.9499],[86.749,66.0107],[77.4486,67.7102]]}];
+    // Select markers by dragging a rectangle. Selection is measured in
+    // viewport pixels, matching the displayed markers at any zoom level.
     let wallMode = false;
-    let chosenWall = null;
-    const wallOverlay = $("wallOverlay");
+    let areaDrag = null;
+    let selectedAreaIds = new Set();
+    const selectionBox = $("selectionBox");
     const wallPanel = $("wallPanel");
 
-    function pointInsidePolygon(x,y,points) {
-      let inside = false;
-      for(let i=0,j=points.length-1;i<points.length;j=i++) {
-        const [xi,yi]=points[i], [xj,yj]=points[j];
-        if (((yi>y)!==(yj>y)) &&
-            (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
-      }
-      return inside;
+    function wallAt() { return null; } // Old hand-drawn wall outlines removed.
+    function drawWallOverlay() {} // Kept for compatibility with renderMap().
+
+    function clearAreaSelection() {
+      selectedAreaIds.clear();
+      selectionBox.style.display = "none";
+      map.querySelectorAll(".climb-marker").forEach(el => el.classList.remove("area-selected"));
+      wallPanel.classList.add("hidden");
     }
-    function wallAt(x,y) {
-      return WALLS.find(w=>pointInsidePolygon(x,y,w.points)) || null;
+
+    function updateAreaBox(a, b) {
+      const left = Math.min(a.x,b.x), top = Math.min(a.y,b.y);
+      const right = Math.max(a.x,b.x), bottom = Math.max(a.y,b.y);
+      selectionBox.style.display = "block";
+      selectionBox.style.left = left + "px";
+      selectionBox.style.top = top + "px";
+      selectionBox.style.width = right-left + "px";
+      selectionBox.style.height = bottom-top + "px";
+      return {left,top,right,bottom};
     }
-    function screenToPercent(point) {
-      return {x:(point.x-offsetX)/(mapWidth*scale)*100,
-              y:(point.y-offsetY)/(mapHeight*scale)*100};
-    }
-    function drawWallOverlay() {
-      wallOverlay.style.left='0px';
-      wallOverlay.style.top='0px';
-      wallOverlay.style.width=mapWidth+'px';
-      wallOverlay.style.height=mapHeight+'px';
-      wallOverlay.style.transformOrigin='0 0';
-      wallOverlay.style.display='block';
-      wallOverlay.style.margin='0';
-      wallOverlay.style.padding='0';
-      wallOverlay.style.transform='translate('+offsetX+'px,'+offsetY+'px) scale('+scale+')';
-    }
-    function highlightWall(wall) {
-      wallOverlay.querySelectorAll('polygon').forEach(poly=>{
-        poly.classList.toggle('hovered',!!wall && poly.dataset.wallId===wall.id);
-        poly.classList.toggle('selected',!!chosenWall && poly.dataset.wallId===chosenWall.id);
+
+    function selectClimbsInArea(box) {
+      selectedAreaIds.clear();
+      map.querySelectorAll(".climb-marker").forEach(el => {
+        const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+        const inside = x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+        el.classList.toggle("area-selected", inside);
+        if (inside) selectedAreaIds.add(el.dataset.climbId);
       });
+      const count = selectedAreaIds.size;
+      $("wallDescription").textContent = count
+        ? count + " climb(s) selected. Removing archives these climbs for everyone, but keeps recorded sends and points."
+        : "No climb markers inside this rectangle. Drag another rectangle to try again.";
+      $("resetWallBtn").disabled = !count;
+      wallPanel.classList.remove("hidden");
     }
-    WALLS.forEach(w=>{
-      const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      poly.setAttribute('points',w.points.map(p=>p.join(',')).join(' '));
-      poly.dataset.wallId=w.id;
-      wallOverlay.appendChild(poly);
-    });
-    $('wallModeBtn').onclick=()=>{
-      wallMode=!wallMode;
-      $('wallModeBtn').classList.toggle('active',wallMode);
-      $('wallModeBtn').textContent=wallMode?'Exit Wall Mode':'Select Wall';
-      $('wallModeHint').textContent=wallMode
-        ? 'Hover or tap a teal/beige wall face. Purple never resets.'
-        : 'Switch on to highlight and reset individual wall faces.';
-      chosenWall=null;
-      wallPanel.classList.add('hidden');
-      highlightWall(null);
-      if(wallMode) clearSelection();
+
+    $("wallModeBtn").onclick = () => {
+      wallMode = !wallMode;
+      $("wallModeBtn").classList.toggle("active", wallMode);
+      $("wallModeBtn").textContent = wallMode ? "Exit Area Selection" : "Select Area";
+      $("wallModeHint").textContent = wallMode
+        ? "Drag across the map to draw a selection rectangle. Zoom first if needed."
+        : "Drag a rectangle around the climb markers you want to remove.";
+      viewport.classList.toggle("area-mode", wallMode);
+      areaDrag = null;
+      clearAreaSelection();
+      if (wallMode) clearSelection();
     };
-    viewport.addEventListener('pointermove',event=>{
-      if(!wallMode || pointers.size>0) return;
-      const pct=screenToPercent(viewportPoint(event.clientX,event.clientY));
-      highlightWall(wallAt(pct.x,pct.y));
-    });
-    viewport.addEventListener('pointerleave',()=>highlightWall(null));
-    function chooseWall(wall) {
-      chosenWall=wall;
-      highlightWall(wall);
-      if(!wall) { wallPanel.classList.add('hidden'); return; }
-      $('wallTitle').textContent=wall.name;
-      const count=climbs.filter(c=>c.wall_id===wall.id).length;
-      $('wallDescription').textContent=count+' active climb(s) on this face. Resetting archives these climbs, but keeps all sends and points.';
-      wallPanel.classList.remove('hidden');
-      wallPanel.scrollIntoView({behavior:'smooth',block:'nearest'});
-    }
-    $('closeWallBtn').onclick=()=>chooseWall(null);
-    $('resetWallBtn').onclick=async()=>{
-      if(!chosenWall || !currentUser || busy) return;
-      const wall=chosenWall;
-      const count=climbs.filter(c=>c.wall_id===wall.id).length;
-      if(!confirm('Reset '+wall.name+'? This will archive '+count+' active climb(s) for everyone. Existing sends and points stay saved.')) return;
-      busy=true;
-      $('resetWallBtn').disabled=true;
+
+    $("closeWallBtn").onclick = () => clearAreaSelection();
+    $("resetWallBtn").onclick = async () => {
+      if (!currentUser || busy || !selectedAreaIds.size) return;
+      const ids = [...selectedAreaIds];
+      if (!confirm("Remove " + ids.length + " selected climb(s) from the map for everyone? Their recorded sends and points will be kept.")) return;
+      busy = true;
+      $("resetWallBtn").disabled = true;
       try {
-        const {data,error}=await supabaseClient.rpc('reset_climbing_wall',{p_wall_id:wall.id});
-        if(error) throw error;
+        // Archive, never delete: sends and leaderboard history remain intact.
+        const {data,error} = await supabaseClient.from("climbs")
+          .update({is_active:false}).in("id",ids).select("id");
+        if (error) throw error;
+        if (!data || data.length !== ids.length) throw new Error(
+          "Only " + (data?.length || 0) + " of " + ids.length + " climbs could be archived. Check Supabase update permissions."
+        );
+        clearAreaSelection();
         await loadClimbs();
-        chooseWall(wall);
-        message('Wall reset complete: '+data+' climbs archived. All earned points remain.');
-      } catch(error) {console.error(error);message('Could not reset wall: '+error.message);}
-      finally {busy=false;$('resetWallBtn').disabled=false;}
+        message(ids.length + " climb(s) removed from the active map. Recorded sends were kept.");
+      } catch (error) {
+        console.error(error);
+        message("Could not remove selected climbs: " + error.message);
+        await loadClimbs().catch(console.error);
+      } finally {
+        busy = false;
+        $("resetWallBtn").disabled = false;
+      }
     };
 
     let currentUser = null;
@@ -1060,6 +1053,17 @@
     viewport.addEventListener(
       "pointerdown",
       event => {
+        if (wallMode) {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          if (areaDrag) return; // one pointer selects; no accidental pinch
+          const pt = viewportPoint(event.clientX,event.clientY);
+          areaDrag = {id:event.pointerId, start:pt, end:pt};
+          clearAreaSelection();
+          updateAreaBox(pt,pt);
+          try { viewport.setPointerCapture(event.pointerId); } catch(e) {}
+          event.preventDefault();
+          return;
+        }
         if (
           event.pointerType === "mouse" &&
           event.button !== 0
@@ -1097,6 +1101,11 @@
     viewport.addEventListener(
       "pointermove",
       event => {
+        if (wallMode && areaDrag?.id === event.pointerId) {
+          areaDrag.end = viewportPoint(event.clientX,event.clientY);
+          updateAreaBox(areaDrag.start,areaDrag.end);
+          return;
+        }
         if (!pointers.has(event.pointerId)) {
           return;
         }
@@ -1195,6 +1204,19 @@
     );
 
     function endPointer(event) {
+      if (wallMode && areaDrag?.id === event.pointerId) {
+        const drag = areaDrag;
+        areaDrag = null;
+        if (event.type === "pointercancel") { clearAreaSelection(); return; }
+        const box = updateAreaBox(drag.start,viewportPoint(event.clientX,event.clientY));
+        if (box.right-box.left < 8 || box.bottom-box.top < 8) {
+          clearAreaSelection();
+          message("Drag a rectangle over the climbs you want to select.");
+        } else {
+          selectClimbsInArea(box);
+        }
+        return;
+      }
       if (!pointers.has(event.pointerId)) {
         return;
       }
@@ -1413,6 +1435,7 @@
     $("gradeFilter").addEventListener("change", renderMarkers);
 
     function renderMarkers() {
+      clearAreaSelection();
       map.querySelectorAll(".climb-marker")
         .forEach(marker => marker.remove());
 
@@ -1473,11 +1496,7 @@
 
     function handleMapTap(point, target) {
       if (busy) return;
-      if (wallMode) {
-        const pct=screenToPercent(point);
-        chooseWall(wallAt(pct.x,pct.y));
-        return;
-      }
+      if (wallMode) return;
 
       if (!currentUser || !currentProfile) {
         message(
