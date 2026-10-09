@@ -112,7 +112,18 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style></head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
+</style><style id="gallery-media-size-fix">
+/* Instagram-style bounded media: never exceeds the feed card or phone viewport. */
+.post, .post-media { min-width:0; max-width:100%; }
+.post { width:100%; overflow:hidden; }
+.post-media { display:block; width:100%; height:auto; max-height:520px; object-fit:contain; background:#050a11; }
+@media(max-width:720px) {
+  .page { min-width:0; }
+  .post { width:100%; margin:14px 0; }
+  .post-media { width:100%!important; height:auto!important; max-height:min(58svh,440px)!important; object-fit:contain!important; }
+}
+</style>
+</head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}
 function dateLabel(v){return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'}).format(new Date(v))}
