@@ -5,10 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Climb Tracker | Track Climbs</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
 
   <style>
-    /* MATCHING HEADER */
     header {
       background: #142133;
       border-bottom: 1px solid #334155;
@@ -57,24 +56,41 @@
       opacity: 0.9;
     }
 
-    /* MAP */
+    /* SCROLLABLE MAP VIEWPORT */
+    .map-viewport {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-top: 20px;
+      border: 1px solid #385069;
+      border-radius: 14px;
+      background: #111827;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+
+    /* MAP AND MARKERS MOVE TOGETHER */
     .map-container {
       position: relative;
       width: 100%;
-      margin-top: 20px;
-      border-radius: 14px;
-      overflow: hidden;
+      margin: 0;
       background: #111827;
       line-height: 0;
       cursor: crosshair;
+      overflow: visible;
+      border-radius: 0;
+      touch-action: pan-x pan-y;
     }
 
     .map-container img {
       display: block;
       width: 100%;
       height: auto;
+      max-width: none;
       user-select: none;
       -webkit-user-drag: none;
+      pointer-events: none;
     }
 
     .climb-marker,
@@ -93,6 +109,7 @@
 
     .climb-marker {
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .climb-marker.sent {
@@ -101,7 +118,7 @@
     }
 
     .climb-marker:hover {
-      transform: translate(-50%, -50%) scale(1.15);
+      transform: translate(-50%, -50%) scale(1.12);
     }
 
     .preview-marker {
@@ -120,7 +137,13 @@
       }
     }
 
-    /* PANELS */
+    .map-hint {
+      color: #66d9d5;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
     .tracker-panel {
       background: #1f2937;
       color: white;
@@ -232,15 +255,90 @@
       margin-top: 12px;
     }
 
-    @media (max-width: 700px) {
+    /* MOBILE OPTIMISATION */
+    @media (max-width: 768px) {
       header .nav {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 14px;
+      }
+
+      header .brand {
+        display: block;
+        text-align: center;
+      }
+
+      header .links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        gap: 8px;
       }
 
       header .links a {
-        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 10px 8px;
         font-size: 13px;
+        text-align: center;
+      }
+
+      /* The important fix:
+         keep the map larger than the phone screen */
+      .map-container {
+        width: max(760px, 100%);
+        min-width: 760px;
+        max-width: none;
+      }
+
+      .map-container img {
+        width: 100%;
+        max-width: none;
+      }
+
+      .map-viewport {
+        cursor: grab;
+      }
+
+      .climb-marker,
+      .preview-marker {
+        width: 36px;
+        height: 36px;
+      }
+
+      .tracker-panel {
+        padding: 16px;
+      }
+
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .field-row select {
+        width: 100%;
+      }
+
+      .action-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .action-row button {
+        width: 100%;
+        margin: 0;
+        min-height: 46px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      header .links a {
+        font-size: 12px;
+        padding: 10px 5px;
       }
     }
   </style>
@@ -266,9 +364,8 @@
     <h1>Track Climbs</h1>
 
     <p>
-      Click the map to place a climb. A grey marker shows
-      where it will go before you save. Click an existing
-      climb to log your send or edit it.
+      Tap an empty spot on the map to add a climb.
+      Tap a coloured marker to log your send or edit a climb.
     </p>
 
     <div class="tracker-links">
@@ -284,24 +381,30 @@
         Green borders mean you've sent the climb.
       </p>
 
-      <div id="mapContainer" class="map-container">
-        <img
-          id="gymMap"
-          src="images/gym-map.png"
-          alt="Top-down map of the climbing gym"
-          draggable="false"
-        >
+      <p class="map-hint">
+        📱 On mobile: swipe left or right to explore the gym map.
+      </p>
 
-        <div
-          id="previewMarker"
-          class="preview-marker hidden"
-          aria-label="Selected map position"
-        >+</div>
+      <div id="mapViewport" class="map-viewport">
+        <div id="mapContainer" class="map-container">
+          <img
+            id="gymMap"
+            src="images/gym-map.png"
+            alt="Top-down map of the climbing gym"
+            draggable="false"
+          >
+
+          <div
+            id="previewMarker"
+            class="preview-marker hidden"
+            aria-label="Selected map position"
+          >+</div>
+        </div>
       </div>
 
       <p class="muted">
-        Click an empty spot to add a climb.
-        Click a coloured marker to view its details.
+        Tap an empty spot to add a climb.
+        Tap a coloured marker to view its details.
       </p>
     </section>
 
@@ -311,7 +414,7 @@
 
       <div class="position-help">
         The grey + on the map shows your selected spot.
-        Click another empty spot to move it before saving.
+        Tap another empty spot to move it before saving.
       </div>
 
       <div class="field-row">
@@ -364,7 +467,9 @@
       <ul id="sendList"></ul>
 
       <div class="action-row">
-        <button id="sendBtn" class="success">Mark as Sent</button>
+        <button id="sendBtn" class="success">
+          Mark as Sent
+        </button>
 
         <button id="removeSendBtn" class="danger hidden">
           Remove My Send
@@ -425,7 +530,7 @@
 
       <div class="position-help">
         The grey + shows the selected position.
-        Click another empty spot on the map to move it.
+        Tap another empty spot on the map to move it.
         Nothing changes until you press Save Changes.
       </div>
 
@@ -440,19 +545,32 @@
     <p id="trackerMessage" role="status"></p>
   </main>
 
-  <footer>
-  </footer>
+  <footer></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
 
   <script>
-    const mapContainer = document.getElementById("mapContainer");
-    const previewMarker = document.getElementById("previewMarker");
-    const addPanel = document.getElementById("addPanel");
-    const climbPanel = document.getElementById("climbPanel");
-    const editPanel = document.getElementById("editPanel");
-    const trackerMessage = document.getElementById("trackerMessage");
+    const mapContainer =
+      document.getElementById("mapContainer");
+
+    const mapViewport =
+      document.getElementById("mapViewport");
+
+    const previewMarker =
+      document.getElementById("previewMarker");
+
+    const addPanel =
+      document.getElementById("addPanel");
+
+    const climbPanel =
+      document.getElementById("climbPanel");
+
+    const editPanel =
+      document.getElementById("editPanel");
+
+    const trackerMessage =
+      document.getElementById("trackerMessage");
 
     const COLOURS = {
       red: "#dc2626",
@@ -505,24 +623,33 @@
       hidePreview();
     }
 
+    /* Coordinates are measured against the
+       full-size map, not the visible phone area. */
     function mapPosition(event) {
       const rect = mapContainer.getBoundingClientRect();
 
       return {
         x: Math.max(
           0,
-          Math.min(100, (event.clientX - rect.left) / rect.width * 100)
+          Math.min(
+            100,
+            (event.clientX - rect.left) / rect.width * 100
+          )
         ),
         y: Math.max(
           0,
-          Math.min(100, (event.clientY - rect.top) / rect.height * 100)
+          Math.min(
+            100,
+            (event.clientY - rect.top) / rect.height * 100
+          )
         )
       };
     }
 
     async function initialiseTracker() {
       try {
-        const authResult = await supabaseClient.auth.getUser();
+        const authResult =
+          await supabaseClient.auth.getUser();
 
         if (authResult.error || !authResult.data.user) {
           window.location.replace("login.html");
@@ -537,7 +664,9 @@
           .eq("id", currentUser.id)
           .maybeSingle();
 
-        if (profileResult.error) throw profileResult.error;
+        if (profileResult.error) {
+          throw profileResult.error;
+        }
 
         if (!profileResult.data) {
           window.location.replace("profile.html");
@@ -549,7 +678,9 @@
 
       } catch (error) {
         console.error(error);
-        showMessage("Could not load tracker: " + error.message);
+        showMessage(
+          "Could not load tracker: " + error.message
+        );
       }
     }
 
@@ -574,14 +705,17 @@
       climbs = climbResult.data || [];
 
       mySentClimbIds = new Set(
-        (sendResult.data || []).map(send => send.climb_id)
+        (sendResult.data || []).map(
+          send => send.climb_id
+        )
       );
 
       renderMarkers();
     }
 
     function renderMarkers() {
-      mapContainer.querySelectorAll(".climb-marker")
+      mapContainer
+        .querySelectorAll(".climb-marker")
         .forEach(marker => marker.remove());
 
       climbs.forEach(climb => {
@@ -591,7 +725,9 @@
         marker.type = "button";
         marker.className = "climb-marker";
 
-        if (sent) marker.classList.add("sent");
+        if (sent) {
+          marker.classList.add("sent");
+        }
 
         marker.style.backgroundColor =
           COLOURS[climb.colour] || COLOURS.blue;
@@ -601,16 +737,23 @@
             ? "#111827"
             : "#ffffff";
 
-        marker.textContent = sent ? "✓" : "V" + climb.grade;
+        marker.textContent =
+          sent ? "✓" : "V" + climb.grade;
 
         marker.title =
           "V" + climb.grade + " " + climb.colour +
           (sent ? " — Sent" : " — Not sent");
 
-        marker.setAttribute("aria-label", marker.title);
+        marker.setAttribute(
+          "aria-label",
+          marker.title
+        );
 
-        marker.style.left = climb.x_position + "%";
-        marker.style.top = climb.y_position + "%";
+        marker.style.left =
+          climb.x_position + "%";
+
+        marker.style.top =
+          climb.y_position + "%";
 
         marker.onclick = event => {
           event.stopPropagation();
@@ -619,7 +762,7 @@
 
           if (mode === "edit") {
             showMessage(
-              "You're editing a climb. Click an empty spot to move it, or cancel editing."
+              "You're editing a climb. Tap an empty spot to move it, or cancel editing."
             );
             return;
           }
@@ -631,12 +774,80 @@
       });
     }
 
+    /* Ignore taps that were actually swipes.
+       This prevents accidental climb creation
+       while scrolling the map on mobile. */
+    let touchStart = null;
+    let suppressMapClick = false;
+
+    mapViewport.addEventListener(
+      "touchstart",
+      event => {
+        if (event.touches.length !== 1) {
+          touchStart = null;
+          return;
+        }
+
+        touchStart = {
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY
+        };
+      },
+      { passive: true }
+    );
+
+    mapViewport.addEventListener(
+      "touchmove",
+      event => {
+        if (!touchStart || event.touches.length !== 1) {
+          return;
+        }
+
+        const dx = Math.abs(
+          event.touches[0].clientX - touchStart.x
+        );
+
+        const dy = Math.abs(
+          event.touches[0].clientY - touchStart.y
+        );
+
+        if (dx > 8 || dy > 8) {
+          suppressMapClick = true;
+        }
+      },
+      { passive: true }
+    );
+
+    mapViewport.addEventListener(
+      "touchend",
+      () => {
+        touchStart = null;
+
+        if (suppressMapClick) {
+          setTimeout(() => {
+            suppressMapClick = false;
+          }, 350);
+        }
+      },
+      { passive: true }
+    );
+
     mapContainer.addEventListener("click", event => {
       if (busy) return;
-      if (event.target.closest(".climb-marker")) return;
+
+      if (suppressMapClick) {
+        suppressMapClick = false;
+        return;
+      }
+
+      if (event.target.closest(".climb-marker")) {
+        return;
+      }
 
       if (!currentUser || !currentProfile) {
-        showMessage("Please log in and create a profile first.");
+        showMessage(
+          "Please log in and create a profile first."
+        );
         return;
       }
 
@@ -645,8 +856,9 @@
       if (mode === "edit") {
         pendingPosition = position;
         showPreview(position);
+
         showMessage(
-          "New position selected. Click Save Changes when you're happy."
+          "New position selected. Tap Save Changes when you're happy."
         );
         return;
       }
@@ -660,7 +872,7 @@
       showPreview(position);
 
       showMessage(
-        "Grey marker placed! Click elsewhere to adjust it, or save your climb."
+        "Grey marker placed! Tap elsewhere to adjust it, or save your climb."
       );
 
       addPanel.scrollIntoView({
@@ -669,16 +881,25 @@
       });
     });
 
-    document.getElementById("cancelAddBtn").onclick = () => {
+    document.getElementById(
+      "cancelAddBtn"
+    ).onclick = () => {
       if (busy) return;
+
       clearSelection();
       showMessage("");
     };
 
-    document.getElementById("saveClimbBtn").onclick = async () => {
-      if (!pendingPosition || !currentUser || busy) return;
+    document.getElementById(
+      "saveClimbBtn"
+    ).onclick = async () => {
+      if (!pendingPosition || !currentUser || busy) {
+        return;
+      }
 
-      const button = document.getElementById("saveClimbBtn");
+      const button =
+        document.getElementById("saveClimbBtn");
+
       const position = { ...pendingPosition };
 
       busy = true;
@@ -709,12 +930,16 @@
         await loadClimbs();
 
         showMessage(
-          "Climb saved! Click its coloured marker to log your send."
+          "Climb saved! Tap its coloured marker to log your send."
         );
 
       } catch (error) {
         console.error(error);
-        showMessage("Could not save climb: " + error.message);
+
+        showMessage(
+          "Could not save climb: " + error.message
+        );
+
       } finally {
         busy = false;
         button.disabled = false;
@@ -729,12 +954,16 @@
       hidePanels();
       hidePreview();
 
-      document.getElementById("selectedGrade").textContent =
+      document.getElementById(
+        "selectedGrade"
+      ).textContent =
         "V" + climb.grade + " — " +
         climb.colour.charAt(0).toUpperCase() +
         climb.colour.slice(1);
 
-      document.getElementById("climbInfo").textContent =
+      document.getElementById(
+        "climbInfo"
+      ).textContent =
         climb.grade + " points per send";
 
       const sent = mySentClimbIds.has(climb.id);
@@ -745,7 +974,8 @@
       document.getElementById("removeSendBtn")
         .classList.toggle("hidden", !sent);
 
-      const isCreator = climb.created_by === currentUser.id;
+      const isCreator =
+        climb.created_by === currentUser.id;
 
       document.getElementById("editClimbBtn")
         .classList.toggle("hidden", !isCreator);
@@ -761,7 +991,9 @@
     }
 
     async function loadClimbSends(climbId) {
-      const list = document.getElementById("sendList");
+      const list =
+        document.getElementById("sendList");
+
       list.replaceChildren();
 
       const { data, error } = await supabaseClient
@@ -769,33 +1001,51 @@
         .select("user_id, profiles(username)")
         .eq("climb_id", climbId);
 
-      if (!selectedClimb || selectedClimb.id !== climbId) return;
+      if (
+        !selectedClimb ||
+        selectedClimb.id !== climbId
+      ) {
+        return;
+      }
 
       if (error) {
-        showMessage("Could not load sends: " + error.message);
+        showMessage(
+          "Could not load sends: " + error.message
+        );
         return;
       }
 
       if (!data || data.length === 0) {
         const item = document.createElement("li");
-        item.textContent = "Nobody has sent this climb yet.";
+
+        item.textContent =
+          "Nobody has sent this climb yet.";
+
         list.appendChild(item);
         return;
       }
 
       data.forEach(send => {
         const item = document.createElement("li");
+
         item.textContent =
-          send.profiles?.username || "Unknown climber";
+          send.profiles?.username ||
+          "Unknown climber";
+
         list.appendChild(item);
       });
     }
 
-    document.getElementById("sendBtn").onclick = async () => {
-      if (!selectedClimb || !currentUser || busy) return;
+    document.getElementById(
+      "sendBtn"
+    ).onclick = async () => {
+      if (!selectedClimb || !currentUser || busy) {
+        return;
+      }
 
       const climb = selectedClimb;
-      const button = document.getElementById("sendBtn");
+      const button =
+        document.getElementById("sendBtn");
 
       busy = true;
       button.disabled = true;
@@ -812,6 +1062,7 @@
 
         mySentClimbIds.add(climb.id);
         renderMarkers();
+
         await openClimb(climb);
 
         showMessage(
@@ -821,18 +1072,28 @@
 
       } catch (error) {
         console.error(error);
-        showMessage("Could not log send: " + error.message);
+
+        showMessage(
+          "Could not log send: " + error.message
+        );
+
       } finally {
         busy = false;
         button.disabled = false;
       }
     };
 
-    document.getElementById("removeSendBtn").onclick = async () => {
-      if (!selectedClimb || !currentUser || busy) return;
+    document.getElementById(
+      "removeSendBtn"
+    ).onclick = async () => {
+      if (!selectedClimb || !currentUser || busy) {
+        return;
+      }
 
       const climb = selectedClimb;
-      const button = document.getElementById("removeSendBtn");
+
+      const button =
+        document.getElementById("removeSendBtn");
 
       busy = true;
       button.disabled = true;
@@ -850,31 +1111,48 @@
         renderMarkers();
 
         await openClimb(climb);
-        showMessage("Your send has been removed.");
+
+        showMessage(
+          "Your send has been removed."
+        );
 
       } catch (error) {
         console.error(error);
-        showMessage("Could not remove send: " + error.message);
+
+        showMessage(
+          "Could not remove send: " + error.message
+        );
+
       } finally {
         busy = false;
         button.disabled = false;
       }
     };
 
-    document.getElementById("editClimbBtn").onclick = () => {
+    document.getElementById(
+      "editClimbBtn"
+    ).onclick = () => {
       if (!selectedClimb || busy) return;
 
-      if (selectedClimb.created_by !== currentUser.id) {
-        showMessage("Only the climb creator can edit this climb.");
+      if (
+        selectedClimb.created_by !== currentUser.id
+      ) {
+        showMessage(
+          "Only the climb creator can edit this climb."
+        );
         return;
       }
 
       mode = "edit";
 
-      document.getElementById("editGradeSelect").value =
+      document.getElementById(
+        "editGradeSelect"
+      ).value =
         String(selectedClimb.grade);
 
-      document.getElementById("editColourSelect").value =
+      document.getElementById(
+        "editColourSelect"
+      ).value =
         selectedClimb.colour;
 
       pendingPosition = {
@@ -888,31 +1166,50 @@
       editPanel.classList.remove("hidden");
 
       showMessage(
-        "Editing climb. The grey marker shows its position. Click elsewhere on the map to move it."
+        "Editing climb. The grey marker shows its position. Tap elsewhere on the map to move it."
       );
     };
 
-    document.getElementById("cancelEditBtn").onclick = () => {
+    document.getElementById(
+      "cancelEditBtn"
+    ).onclick = () => {
       if (busy) return;
 
       const climb = selectedClimb;
+
       clearSelection();
       showMessage("Editing cancelled.");
 
-      if (climb) openClimb(climb);
+      if (climb) {
+        openClimb(climb);
+      }
     };
 
-    document.getElementById("saveEditBtn").onclick = async () => {
-      if (!selectedClimb || !pendingPosition || busy) return;
+    document.getElementById(
+      "saveEditBtn"
+    ).onclick = async () => {
+      if (
+        !selectedClimb ||
+        !pendingPosition ||
+        busy
+      ) {
+        return;
+      }
 
-      if (selectedClimb.created_by !== currentUser.id) {
-        showMessage("Only the climb creator can edit this climb.");
+      if (
+        selectedClimb.created_by !== currentUser.id
+      ) {
+        showMessage(
+          "Only the climb creator can edit this climb."
+        );
         return;
       }
 
       const climbId = selectedClimb.id;
       const position = { ...pendingPosition };
-      const button = document.getElementById("saveEditBtn");
+
+      const button =
+        document.getElementById("saveEditBtn");
 
       busy = true;
       button.disabled = true;
@@ -920,11 +1217,15 @@
 
       try {
         const grade = Number(
-          document.getElementById("editGradeSelect").value
+          document.getElementById(
+            "editGradeSelect"
+          ).value
         );
 
         const colour =
-          document.getElementById("editColourSelect").value;
+          document.getElementById(
+            "editColourSelect"
+          ).value;
 
         const { data, error } = await supabaseClient
           .from("climbs")
@@ -957,19 +1258,28 @@
           await openClimb(updatedClimb);
         }
 
-        showMessage("Climb updated successfully!");
+        showMessage(
+          "Climb updated successfully!"
+        );
 
       } catch (error) {
         console.error(error);
-        showMessage("Could not edit climb: " + error.message);
+
+        showMessage(
+          "Could not edit climb: " + error.message
+        );
+
       } finally {
         busy = false;
         button.disabled = false;
       }
     };
 
-    document.getElementById("closeClimbBtn").onclick = () => {
+    document.getElementById(
+      "closeClimbBtn"
+    ).onclick = () => {
       if (busy) return;
+
       clearSelection();
       showMessage("");
     };
