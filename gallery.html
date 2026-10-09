@@ -57,6 +57,61 @@ button, input, select, textarea { max-width: 100%; }
   .post-head time { max-width: 76px; }
   .player-row { gap: 6px; }
 }
+</style><style>
+/* Dedicated mobile app interface: desktop remains unchanged. */
+.mobile-app-bar{display:none}
+@media(max-width:720px){
+ html{scroll-padding-bottom:90px}
+ body{background:#0b1220;padding-bottom:calc(90px + env(safe-area-inset-bottom));overflow-x:hidden}
+ header{position:sticky;top:0;z-index:80;background:#101b2c;border-bottom:1px solid #27374b}
+ header .nav{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;padding:13px 0!important}
+ header .brand{font-size:15px!important;letter-spacing:.03em}
+ header .links{display:none!important}
+ .mobile-app-bar{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;bottom:0;left:0;right:0;z-index:999;background:#142133;border-top:1px solid #34475c;padding:7px 5px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px #0006}
+ .mobile-app-bar a{min-width:0;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;text-decoration:none;color:#a8b8ca;font-size:10px;font-weight:700;min-height:48px;border-radius:10px}
+ .mobile-app-bar a .app-icon{font-size:23px;line-height:1.1}
+ .mobile-app-bar a[aria-current="page"]{color:#66d9d5;background:#1e3749}
+ .wrap{width:calc(100% - 24px)!important;max-width:100%!important}
+ main{padding-bottom:12px}
+ .hero{padding-top:24px!important;padding-bottom:18px!important}
+ .hero h1{font-size:clamp(26px,8vw,34px)!important}
+ .dashboard-heading{margin-top:24px!important;font-size:21px}
+ .dashboard-links{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .dashboard-links a{padding:12px 8px!important;font-size:13px!important;min-width:0}
+ .dashboard-links a:first-child{grid-column:1/-1}
+ .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ .stat-card{grid-column:auto!important;padding:12px 5px!important;border-radius:12px!important}
+ .stat-number{font-size:25px!important}
+ .stat-label{font-size:11px!important}
+ .leaderboard-grid{display:grid!important;grid-template-columns:1fr!important;gap:14px!important}
+ .dashboard-card{padding:14px!important;border-radius:14px!important}
+ .dashboard-table{font-size:12px!important}
+ .dashboard-table td,.dashboard-table th{padding:9px 3px!important}
+ .page{margin:12px auto 22px!important;max-width:100%!important}
+ .page>h1{font-size:26px!important;margin:14px 0 8px!important}
+ .page>.muted{font-size:13px;line-height:1.5}
+ .post{margin:14px -12px!important;border-left:0!important;border-right:0!important;border-radius:0!important;background:#172335!important}
+ .post-head{padding:12px 14px!important;align-items:center!important}
+ .post-head time{font-size:11px!important;max-width:100px}
+ .post-media{width:100%!important;max-height:75vh!important;object-fit:contain!important;background:#050a11}
+ .post h2{font-size:17px!important;margin:13px 14px 6px!important}
+ .post p{margin:0 14px 16px!important}
+ .profile-container{margin-top:16px!important}
+ .profile-card{padding:16px!important;border-radius:13px!important;margin-bottom:12px!important}
+ .profile-top{gap:12px!important}
+ .profile-stats,.stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .profile-stat,.stat{padding:13px!important}
+ .leaderboard-page{padding-top:18px!important}
+ .leaderboard-tabs{position:sticky;top:56px;z-index:50;background:#0b1220;padding:8px 0;margin:10px 0!important}
+ .player-row{padding:12px 9px!important;gap:9px!important;border-radius:12px!important}
+ .player-rank{font-size:18px!important;min-width:35px!important}
+ .player-name{font-size:15px!important}
+ .player-points{font-size:19px!important}
+ .map-toolbar,.action-row{gap:8px!important}
+ .map-toolbar button,.action-row button{min-height:44px}
+ #more{min-height:46px;width:100%}
+}
+@media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
 </style></head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}
@@ -73,4 +128,4 @@ let offset=0;const PAGE=18;let loading=false,done=false;
 async function loadMore(){if(loading||done)return;loading=true;$('more').disabled=true;$('status').textContent='Loading posts...';try{const {data,error}=await supabaseClient.from('climb_media').select('id,climb_id,user_id,storage_path,media_type,created_at').order('created_at',{ascending:false}).range(offset,offset+PAGE-1);if(error)throw error;offset+=(data||[]).length;const profiles=await getProfiles([...new Set((data||[]).map(x=>x.user_id))]);const climbs=await getClimbs([...new Set((data||[]).map(x=>x.climb_id))]);let count=0;for(const item of data||[]){const card=renderPost(item,profiles,climbs);if(card){$('feed').append(card);count++}}if((data||[]).length<PAGE)done=true;$('more').hidden=done;$('status').textContent=done?($('feed').children.length?'You are all caught up!':'No uploads yet. Complete a climb and add a photo or video on the tracker!'):'';}catch(e){console.error(e);$('status').textContent='Could not load gallery: '+e.message;$('more').hidden=false}finally{loading=false;$('more').disabled=false}}
 $('more').onclick=loadMore;
 (async()=>{const {data}=await supabaseClient.auth.getUser();if(!data.user){location.replace('login.html');return}await loadMore()})();
-</script></body></html>
+</script><nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html" aria-current="page"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav></body></html>
