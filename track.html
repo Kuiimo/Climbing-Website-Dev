@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Climb Tracker | Track Climbs</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 
   <style>
     .hidden { display: none !important; }
@@ -387,7 +387,7 @@
     }
 
     /* Wall selection highlights; markers stay their original size. */
-    #wallOverlay { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1; }
+    #wallOverlay { position:absolute; left:0; top:0; pointer-events:none; overflow:visible; z-index:1; }
     #wallOverlay polygon { fill:#4de0d5; fill-opacity:.04; stroke:transparent; stroke-width:.45; vector-effect:non-scaling-stroke; }
     #wallOverlay polygon.hovered, #wallOverlay polygon.selected { fill-opacity:.32; stroke:#6ef9e7; stroke-width:2; }
     #wallOverlay polygon.selected { fill-opacity:.40; }
@@ -693,7 +693,7 @@
 
     /* Wall face boundaries are approximate outlines of the current map.
        Purple is intentionally not selectable/resettable. */
-    const WALLS = [{"id":"B01","name":"Upper beige wall","points":[[3.6585,10.8424],[47.561,10.8424],[42.378,19.4329],[33.1555,15.0125],[23.4756,18.2652],[10.4421,15.0959],[3.6585,24.854]]},{"id":"T03","name":"Upper teal wall","points":[[47.561,10.8424],[93.5213,10.6756],[93.5213,13.2611],[85.5945,13.4279],[73.0183,19.7665],[70.4268,23.9366],[47.7896,22.2686],[42.378,19.4329]]},{"id":"T04","name":"Left teal wall","points":[[3.6585,24.9374],[6.5549,22.9358],[6.5549,30.025],[8.1555,36.03],[6.5549,45.7048],[6.5549,61.3011],[12.8811,71.7264],[3.6585,77.1476]]},{"id":"B02","name":"Lower-left beige wall","points":[[3.6585,77.1476],[12.8811,71.7264],[12.8811,84.4871],[22.0274,84.4871],[25.0762,82.402],[32.0884,82.402],[35.2134,92.9108],[3.6585,92.9108]]},{"id":"B03","name":"Centre island beige","points":[[26.9055,30.2752],[31.936,29.4412],[36.0518,31.6097],[37.1951,34.8624],[51.4482,50.8757],[52.5915,59.8832],[50.686,61.9683]]},{"id":"T06","name":"Centre island teal","points":[[26.9055,30.2752],[50.686,61.9683],[48.1707,64.5538],[33.3841,57.548],[25.9909,44.0367]]},{"id":"B04","name":"Right island beige","points":[[67.8354,50.7923],[86.814,33.7781],[91.8445,37.0309],[74.5427,56.8807],[71.7226,61.9683],[69.436,59.0492]]},{"id":"T07","name":"Right island teal","points":[[71.7226,61.9683],[91.8445,37.0309],[92.2256,40.8674],[82.7744,63.1359],[74.1616,64.8874]]}];
+    const WALLS = [{"id":"B01","name":"Upper beige wall","points":[[1.3169,9.839],[48.7243,9.839],[43.0453,19.2308],[33.1687,14.2218],[22.0576,17.8891],[8.4774,14.1324],[1.3169,24.9553]]},{"id":"T03","name":"Upper teal wall","points":[[48.7243,9.839],[98.4362,9.839],[98.4362,12.4329],[89.5473,12.5224],[76.2963,19.4097],[73.3333,23.7925],[48.9712,22.1825],[43.0453,19.2308]]},{"id":"T04","name":"Left teal wall","points":[[1.3169,24.9553],[4.5267,23.0769],[4.5267,30.4114],[6.1728,36.941],[4.5267,46.9589],[4.5267,66.1896],[11.2757,75.1342],[1.3169,80.7692]]},{"id":"B02","name":"Lower-left beige wall","points":[[1.3169,80.7692],[11.2757,75.1342],[11.2757,88.7299],[21.1523,88.7299],[24.4444,86.6726],[31.9342,86.6726],[35.3909,97.8533],[1.3169,97.8533]]},{"id":"B03","name":"Centre island beige","points":[[26.3374,30.4114],[31.9342,29.6959],[36.3786,32.2004],[37.6955,35.7782],[52.9218,52.7728],[54.1564,62.1646],[51.9342,64.7585]]},{"id":"T06","name":"Centre island teal","points":[[26.3374,30.4114],[51.9342,64.7585],[49.3827,67.5313],[33.5802,59.9284],[25.4321,45.4383]]},{"id":"B04","name":"Right island beige","points":[[70.6173,52.5939],[91.1111,34.4365],[96.5432,38.0143],[74.8971,64.7585],[72.2634,61.3596]]},{"id":"T07","name":"Right island teal","points":[[74.8971,64.7585],[96.5432,38.0143],[97.037,41.9499],[86.749,66.0107],[77.4486,67.7102]]}];
     let wallMode = false;
     let chosenWall = null;
     const wallOverlay = $("wallOverlay");
@@ -721,6 +721,9 @@
       wallOverlay.style.width=mapWidth+'px';
       wallOverlay.style.height=mapHeight+'px';
       wallOverlay.style.transformOrigin='0 0';
+      wallOverlay.style.display='block';
+      wallOverlay.style.margin='0';
+      wallOverlay.style.padding='0';
       wallOverlay.style.transform='translate('+offsetX+'px,'+offsetY+'px) scale('+scale+')';
     }
     function highlightWall(wall) {
