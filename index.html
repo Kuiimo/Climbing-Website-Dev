@@ -32,6 +32,10 @@ header .links a:hover { opacity:.9; }
 .leaderboard-footer { display:inline-block; margin-top:18px; color:#66d9d5; text-decoration:none; font-weight:600; }
 .dashboard-note { color:#94a3b8; margin:22px 0 32px; }
 #dashboardMessage { color:#93c5fd; margin:18px 0; }
+/* Leaderboard profile pictures */
+.leaderboard-person { display:flex; align-items:center; gap:9px; min-width:0; }
+.leaderboard-avatar { width:32px; height:32px; flex:0 0 32px; border-radius:50%; object-fit:cover; background:#35b8b5; color:#081521; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+.leaderboard-person-name { overflow-wrap:anywhere; }
 /* New read-only map: all existing dashboard sections remain unchanged. */
 .home-map-toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:16px 0; color:#cbd5e1; }
 .home-map-toolbar select { background:#101827; color:#f8fafc; border:1px solid #475569; border-radius:9px; padding:10px 14px; font:inherit; }
@@ -79,10 +83,32 @@ let currentUser = null;
 function sortLeaderboard(rows) {
  return [...rows].sort((a,b)=>Number(b.points)-Number(a.points)||Number(b.total_sends)-Number(a.total_sends)||String(a.username).localeCompare(String(b.username)));
 }
-function renderLeaderboard(elementId, rows) {
- const tbody=document.getElementById(elementId);tbody.replaceChildren();
- if(rows.length===0){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='No climbers yet.';tr.appendChild(td);tbody.appendChild(tr);return;}
- rows.slice(0,5).forEach((player,index)=>{const tr=document.createElement('tr');if(currentUser&&player.id===currentUser.id)tr.classList.add('me');['#'+(index+1),player.username,player.total_sends,player.points].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td)});tbody.appendChild(tr)});
+function renderLeaderboard(elementId, rows, avatars = {}) {
+ const tbody = document.getElementById(elementId);
+ tbody.replaceChildren();
+ if (!rows.length) {
+  const tr = document.createElement('tr'), td = document.createElement('td');
+  td.colSpan = 4; td.textContent = 'No climbers yet.';
+  tr.appendChild(td); tbody.appendChild(tr); return;
+ }
+ rows.slice(0,5).forEach((player,index) => {
+  const tr = document.createElement('tr');
+  if (currentUser && player.id === currentUser.id) tr.classList.add('me');
+  const rank = document.createElement('td'); rank.textContent = '#' + (index+1); tr.appendChild(rank);
+  const nameCell = document.createElement('td');
+  const person = document.createElement('div'); person.className = 'leaderboard-person';
+  const avatarUrl = avatars[player.id];
+  const fallback = () => { const circle=document.createElement('span'); circle.className='leaderboard-avatar'; circle.textContent=String(player.username||'?').charAt(0).toUpperCase(); return circle; };
+  if (avatarUrl) {
+   const img = document.createElement('img'); img.className = 'leaderboard-avatar';
+   img.alt = ''; img.src = avatarUrl; img.referrerPolicy = 'no-referrer';
+   img.onerror = () => img.replaceWith(fallback()); person.appendChild(img);
+  } else person.appendChild(fallback());
+  const label=document.createElement('span'); label.className='leaderboard-person-name'; label.textContent=player.username;
+  person.appendChild(label); nameCell.appendChild(person); tr.appendChild(nameCell);
+  [player.total_sends,player.points].forEach(value => { const td=document.createElement('td'); td.textContent=value; tr.appendChild(td); });
+  tbody.appendChild(tr);
+ });
 }
 async function loadDashboard() {
  try {
@@ -102,7 +128,17 @@ async function loadDashboard() {
   document.getElementById('myClimbs').textContent=myEntry?myEntry.total_sends:'0';
   document.getElementById('myPoints').textContent=myEntry?myEntry.points:'0';
   document.getElementById('myRank').textContent=rank>0?'#'+rank:'—';
-  renderLeaderboard('monthlyLeaderboard',monthlyRows);renderLeaderboard('allTimeLeaderboard',allTimeRows);
+  // Avatar URLs live in profiles, not the leaderboard views.
+  // Keep the leaderboard working even if the avatar lookup fails.
+  let avatars = {};
+  const ids = [...new Set([...monthlyRows,...allTimeRows].map(p=>p.id).filter(Boolean))];
+  if (ids.length) {
+   const avatarResult = await supabaseClient.from('profiles').select('id, avatar_url').in('id', ids);
+   if (avatarResult.error) console.warn('Could not load leaderboard photos:', avatarResult.error.message);
+   else avatars = Object.fromEntries((avatarResult.data||[]).map(p=>[p.id,p.avatar_url]));
+  }
+  renderLeaderboard('monthlyLeaderboard',monthlyRows,avatars);
+  renderLeaderboard('allTimeLeaderboard',allTimeRows,avatars);
  }catch(error){console.error(error);document.getElementById('dashboardMessage').textContent='Could not load dashboard: '+error.message;}
 }
 const homeGradeFilter=document.getElementById('homeGradeFilter');
