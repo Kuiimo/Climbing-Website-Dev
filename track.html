@@ -656,6 +656,12 @@
       </div>
     </section>
 
+    <section class="card" style="margin-top:22px">
+      <h2>Activity Log</h2>
+      <p class="muted">Recent climbs added, completed, edited and removed.</p>
+      <div id="auditLog" aria-live="polite">Loading activity...</div>
+      <button type="button" id="refreshAuditBtn" class="secondary" style="margin-top:12px">Refresh Activity</button>
+    </section>
     <p id="trackerMessage" role="status"></p>
   </main>
 
@@ -758,14 +764,12 @@
       $("resetWallBtn").disabled = true;
       try {
         // Archive, never delete: sends and leaderboard history remain intact.
-        const {data,error} = await supabaseClient.from("climbs")
-          .update({is_active:false}).in("id",ids).select("id");
+        const {data,error} = await supabaseClient.rpc("archive_selected_climbs", {climb_ids:ids});
         if (error) throw error;
-        if (!data || data.length !== ids.length) throw new Error(
-          "Only " + (data?.length || 0) + " of " + ids.length + " climbs could be archived. Check Supabase update permissions."
-        );
+        if (Number(data) !== ids.length) throw new Error("Some climbs were not archived. Please refresh and try again.");
         clearAreaSelection();
         await loadClimbs();
+        await loadAudit();
         message(ids.length + " climb(s) removed from the active map. Recorded sends were kept.");
       } catch (error) {
         console.error(error);
@@ -1768,6 +1772,7 @@
         renderMarkers();
 
         await openClimb(climb);
+        await loadAudit();
 
         message(
           "Send recorded! You earned " +
@@ -1819,6 +1824,7 @@
         renderMarkers();
 
         await openClimb(climb);
+        await loadAudit();
 
         message(
           "Your send has been removed."
@@ -1960,6 +1966,7 @@
           await openClimb(updated);
         }
 
+        await loadAudit();
         message(
           "Climb updated successfully!"
         );
@@ -1984,6 +1991,35 @@
       message("");
     };
 
+    async function loadAudit() {
+      const holder = $("auditLog");
+      const {data,error} = await supabaseClient.from("activity_log")
+        .select("id, actor_name, action, colour, grade, climb_count, created_at")
+        .order("created_at",{ascending:false}).limit(40);
+      if(error){ holder.textContent = "Could not load activity: " + error.message; return; }
+      holder.replaceChildren();
+      if(!data?.length){ holder.textContent = "No activity yet."; return; }
+      data.forEach(entry => {
+        const row = document.createElement("div");
+        row.style.cssText = "padding:12px 0;border-bottom:1px solid #334155;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap";
+        const msg = document.createElement("span");
+        const who = entry.actor_name || "A climber";
+        const what = entry.action === "added" ? `added a ${entry.colour} V${entry.grade}`
+          : entry.action === "completed" ? `completed ${entry.colour} V${entry.grade}`
+          : entry.action === "uncompleted" ? `removed a send for ${entry.colour} V${entry.grade}`
+          : entry.action === "edited" ? `edited a climb (${entry.colour} V${entry.grade})`
+          : entry.action === "removed" ? `removed ${entry.climb_count} climb${entry.climb_count===1?"":"s"}`
+          : entry.action;
+        msg.textContent = `${who} ${what}`;
+        const when = document.createElement("small");
+        when.className = "muted";
+        when.textContent = new Date(entry.created_at).toLocaleString();
+        row.append(msg,when);holder.append(row);
+      });
+    }
+    $("refreshAuditBtn").onclick = loadAudit;
+    const originalLoadClimbs = loadClimbs;
+    loadClimbs = async function() { await originalLoadClimbs(); await loadAudit(); };
     initialiseTracker();
   </script>
 </body>
