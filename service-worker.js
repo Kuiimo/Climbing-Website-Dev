@@ -1,5 +1,5 @@
 /* Brushworks PWA: network-first pages, limited static caching. */
-const CACHE_NAME = 'brushworks-pwa-v2';
+const CACHE_NAME = 'climb-tracker-pwa-v4';
 const SHELL = ['./', './index.html', './offline.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));

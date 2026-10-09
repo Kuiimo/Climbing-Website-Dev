@@ -128,8 +128,26 @@ button, input, select, textarea { max-width: 100%; }
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Climb Tracker">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-</head><body><header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><a class="back" href="gallery.html">← Back to Gallery</a><section class="profile-card"><div id="who" class="profile-top"></div></section><section class="profile-card"><h2>Climbing Stats</h2><div id="stats" class="stats"></div></section><section class="profile-card"><h2>Completed by Grade · All Time</h2><div id="grades" class="grades"></div></section><h2>Previous Uploads</h2><div id="posts"></div><p id="status" class="notice" role="status"></p></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=4">
+
+<style id="climb-tracker-polished-cards">
+/* Rounded, contained gallery cards on every screen size. */
+.post { border-radius:20px!important; overflow:hidden!important; background:#172335!important; border:1px solid #30445a!important; box-shadow:0 10px 30px rgba(0,0,0,.17); }
+.post-media { width:100%!important; max-width:100%!important; display:block!important; object-fit:contain!important; background:#080f1b!important; }
+header .brand { display:inline-flex!important; align-items:center!important; gap:10px!important; }
+header .brand .brand-logo { width:34px; height:34px; border-radius:10px; object-fit:cover; flex-shrink:0; box-shadow:0 0 12px rgba(75,230,222,.26); }
+@media(max-width:720px) {
+  .page { width:calc(100% - 28px)!important; max-width:100%!important; margin-left:auto!important; margin-right:auto!important; }
+  #feed { min-width:0; width:100%; }
+  .post { width:100%!important; max-width:100%!important; margin:16px 0!important; border-radius:20px!important; border:1px solid #30445a!important; overflow:hidden!important; }
+  .post-head { padding:14px!important; }
+  .post-media { max-height:min(58svh,440px)!important; height:auto!important; object-fit:contain!important; }
+  .post h2 { padding:0!important; margin:13px 14px 6px!important; }
+  .post p { margin:0 14px 16px!important; }
+  header .brand .brand-logo { width:36px; height:36px; }
+}
+</style>
+</head><body><header><nav class="wrap nav"><a class="brand" href="index.html"><img class="brand-logo" src="icons/icon-192.png?v=4" alt="" aria-hidden="true"> CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><a class="back" href="gallery.html">← Back to Gallery</a><section class="profile-card"><div id="who" class="profile-top"></div></section><section class="profile-card"><h2>Climbing Stats</h2><div id="stats" class="stats"></div></section><section class="profile-card"><h2>Completed by Grade · All Time</h2><div id="grades" class="grades"></div></section><h2>Previous Uploads</h2><div id="posts"></div><p id="status" class="notice" role="status"></p></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}
 function dateLabel(v){return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'}).format(new Date(v))}

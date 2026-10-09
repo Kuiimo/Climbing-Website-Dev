@@ -1,8 +1,5 @@
+TEAL MOUNTAIN LOGO UPDATE
 
-1. Visit https://kujimo.github.io/Climbing-Website-Dev/
-2. iPhone: open in Safari > Share > Add to Home Screen > Add. Android: open in Chrome > menu > Install app or Add to Home screen.
-3. If you later update your app and want to refresh offline files, change CACHE_NAME in service-worker.js from v1 to v2.
+No yellow circle. The home screen icon and header now use the same teal mountain logo. Gallery rounding fixes from the previous update are preserved.
 
-This PWA still requires internet for Supabase operations. The service worker does not cache Supabase data.
-
-No Supabase SQL is required for the PWA itself.
+Upload all files and the icons folder to the root of your GitHub repository. Replace existing files and commit. If the iPhone icon remains old, remove the installed app and add it to the home screen again using Safari.
