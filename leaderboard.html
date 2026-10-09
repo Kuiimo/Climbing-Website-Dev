@@ -145,7 +145,15 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style><style>.player-hardest{font-size:12px;color:#a5f3fc;margin-top:4px}</style></head>
+</style><style>.player-hardest{font-size:12px;color:#a5f3fc;margin-top:4px}</style><style>
+/* Period selection shared by desktop and mobile. */
+.period-date-range{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:10px 0 18px;padding:13px;border:1px solid #334155;border-radius:12px;background:#132235}
+.period-date-range[hidden]{display:none!important}
+.period-date-range label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#e2e8f0;flex:1 1 135px}
+.period-date-range input[type=date]{width:100%;min-width:0;min-height:44px;padding:9px;color:#fff;background:#24364d;border:1px solid #64748b;border-radius:9px;color-scheme:dark;font:inherit}
+.period-date-range button{min-height:44px;padding:10px 18px;background:#35b8b5;color:#081521;border:0;border-radius:9px;font-weight:700;cursor:pointer}
+@media(max-width:600px){.period-date-range{padding:10px;gap:8px}.period-date-range label{flex-basis:120px}.period-date-range button{width:100%}}
+</style></head>
 <body>
 <header><nav class="wrap nav">
 <a class="brand" href="index.html">⛰ CLIMB TRACKER</a>
@@ -154,7 +162,8 @@ button, input, select, textarea { max-width: 100%; }
 </nav></header>
 <main class="wrap leaderboard-page">
 <h1>Leaderboard</h1>
-<div class="leaderboard-tabs"><button id="monthlyBtn" class="active">This Month</button><button id="allTimeBtn">All Time</button></div>
+<div class="leaderboard-tabs" style="display:block"><label for="leaderboardPeriod" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:650">Show leaderboard <select id="leaderboardPeriod" style="min-height:44px;min-width:150px;max-width:65%;padding:9px 12px;border-radius:10px;background:#24364d;color:white;border:1px solid #64748b;font:inherit"><option value="monthly">This Month</option><option value="alltime">All Time</option><option value="last7">Last 7 Days</option><option value="custom">Custom Dates</option></select></label></div>
+<div class="period-date-range" id="leaderboardCustomRange" hidden><label>From<input id="leaderboardDateStart" type="date"></label><label>To<input id="leaderboardDateEnd" type="date"></label><button id="leaderboardApplyDates" type="button">Apply dates</button></div>
 <div id="playerList"></div>
 <p id="leaderboardMessage" role="status"></p>
 </main>
@@ -163,6 +172,28 @@ button, input, select, textarea { max-width: 100%; }
 <script src="supabase-config.js"></script>
 <script>
 let currentPeriod = "monthly";
+
+function ukToday(offsetDays=0){
+ const london = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const parts=Object.fromEntries(london.map(p=>[p.type,p.value]));
+ const utc=new Date(Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day)+offsetDays));
+ return utc.toISOString().slice(0,10);
+}
+function validateDates(start,end){
+ if(!start||!end)throw new Error('Choose both a start and an end date.');
+ if(start>end)throw new Error('The start date must be on or before the end date.');
+ if(end>ukToday())throw new Error('The end date cannot be in the future.');
+}
+async function fetchPeriodLeaderboard(period,start,end){
+ if(period==='monthly'||period==='alltime'){
+  const view=period==='monthly'?'monthly_leaderboard_flashes':'leaderboard_flashes';
+  return await supabaseClient.from(view).select('id, username, total_sends, points, hardest_grade');
+ }
+ if(period==='last7'){start=ukToday(-6);end=ukToday();}
+ validateDates(start,end);
+ return await supabaseClient.rpc('leaderboard_for_dates',{start_date:start,end_date:end});
+}
+
 let currentUser = null;
 let loadNumber = 0;
 
@@ -199,8 +230,7 @@ async function loadLeaderboard() {
   list.replaceChildren();
   message.textContent = "Loading leaderboard...";
   try {
-    const view = currentPeriod === "monthly" ? "monthly_leaderboard_flashes" : "leaderboard_flashes";
-    const {data,error} = await supabaseClient.from(view).select("id, username, total_sends, points, hardest_grade");
+    const {data,error} = await fetchPeriodLeaderboard(currentPeriod,document.getElementById('leaderboardDateStart').value,document.getElementById('leaderboardDateEnd').value);
     if (error) throw error;
     const players = sortPlayers(data || []);
     const avatars = new Map();
@@ -261,18 +291,18 @@ async function loadLeaderboard() {
   }
 }
 
-document.getElementById("monthlyBtn").onclick = () => {
-  currentPeriod = "monthly";
-  document.getElementById("monthlyBtn").classList.add("active");
-  document.getElementById("allTimeBtn").classList.remove("active");
-  loadLeaderboard();
-};
-document.getElementById("allTimeBtn").onclick = () => {
-  currentPeriod = "allTime";
-  document.getElementById("allTimeBtn").classList.add("active");
-  document.getElementById("monthlyBtn").classList.remove("active");
-  loadLeaderboard();
-};
+const periodPicker=document.getElementById('leaderboardPeriod');
+const rangePanel=document.getElementById('leaderboardCustomRange');
+const startPicker=document.getElementById('leaderboardDateStart');
+const endPicker=document.getElementById('leaderboardDateEnd');
+startPicker.value=ukToday(-6);endPicker.value=ukToday();
+startPicker.max=ukToday();endPicker.max=ukToday();
+periodPicker.addEventListener('change',()=>{
+ currentPeriod=periodPicker.value;rangePanel.hidden=currentPeriod!=='custom';
+ if(currentPeriod!=='custom')loadLeaderboard();
+ else {document.getElementById('playerList').replaceChildren();document.getElementById('leaderboardMessage').textContent='Choose your dates and tap Apply dates.';}
+});
+document.getElementById('leaderboardApplyDates').addEventListener('click',()=>{currentPeriod='custom';loadLeaderboard();});
 async function initialiseLeaderboard() {
   const auth = await supabaseClient.auth.getUser();
   currentUser = auth.data?.user || null;

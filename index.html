@@ -178,7 +178,15 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style><style>@media(max-width:600px){.dashboard-table{width:100%;table-layout:fixed;font-size:11px}.dashboard-table th,.dashboard-table td{padding:9px 3px;overflow-wrap:anywhere}.dashboard-table th:nth-child(1){width:10%}.dashboard-table th:nth-child(2){width:32%}.dashboard-table th:nth-child(3){width:15%}.dashboard-table th:nth-child(4){width:24%}.dashboard-table th:nth-child(5){width:19%}.leaderboard-person-name{overflow-wrap:anywhere}}</style></head>
+</style><style>@media(max-width:600px){.dashboard-table{width:100%;table-layout:fixed;font-size:11px}.dashboard-table th,.dashboard-table td{padding:9px 3px;overflow-wrap:anywhere}.dashboard-table th:nth-child(1){width:10%}.dashboard-table th:nth-child(2){width:32%}.dashboard-table th:nth-child(3){width:15%}.dashboard-table th:nth-child(4){width:24%}.dashboard-table th:nth-child(5){width:19%}.leaderboard-person-name{overflow-wrap:anywhere}}</style><style>
+/* Period selection shared by desktop and mobile. */
+.period-date-range{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:10px 0 18px;padding:13px;border:1px solid #334155;border-radius:12px;background:#132235}
+.period-date-range[hidden]{display:none!important}
+.period-date-range label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#e2e8f0;flex:1 1 135px}
+.period-date-range input[type=date]{width:100%;min-width:0;min-height:44px;padding:9px;color:#fff;background:#24364d;border:1px solid #64748b;border-radius:9px;color-scheme:dark;font:inherit}
+.period-date-range button{min-height:44px;padding:10px 18px;background:#35b8b5;color:#081521;border:0;border-radius:9px;font-weight:700;cursor:pointer}
+@media(max-width:600px){.period-date-range{padding:10px;gap:8px}.period-date-range label{flex-basis:120px}.period-date-range button{width:100%}}
+</style></head>
 <body>
 <header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a class="active" href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a>
       <a href="gallery.html">Gallery</a><a href="leaderboard.html">Leaderboard</a></div></nav></header>
@@ -186,9 +194,10 @@ button, input, select, textarea { max-width: 100%; }
 <section class="hero"><h1 id="welcomeHeading">Welcome, climbers.</h1><p>Track your climbs.</p><div class="dashboard-links"><a class="button" href="track.html">Explore the gym map →</a><a class="secondary-link" href="profile.html">My Profile</a><a class="secondary-link" href="leaderboard.html">Full Leaderboard</a><a class="secondary-link" href="gallery.html">Climbing Gallery →</a></div></section>
 <h2 class="dashboard-heading">Your Stats This Month</h2>
 <div class="stats-grid"><div class="stat-card"><div id="myClimbs" class="stat-number">—</div><div class="stat-label">Climbs Sent</div></div><div class="stat-card"><div id="myPoints" class="stat-number">—</div><div class="stat-label">Points Earned</div></div><div class="stat-card"><div id="myRank" class="stat-number">—</div><div class="stat-label">Monthly Rank</div></div></div>
-<div class="leaderboard-heading-row"><h2 class="dashboard-heading">Climbing Leaderboards</h2><label class="leaderboard-picker-label" for="homeLeaderboardPicker">Show <select id="homeLeaderboardPicker" aria-label="Choose leaderboard"><option value="monthly">This Month</option><option value="alltime">All Time</option></select></label></div>
+<div class="leaderboard-heading-row"><h2 class="dashboard-heading">Climbing Leaderboards</h2><label class="leaderboard-picker-label" for="homeLeaderboardPicker">Show <select id="homeLeaderboardPicker" aria-label="Choose leaderboard"><option value="monthly">This Month</option><option value="alltime">All Time</option><option value="last7">Last 7 Days</option><option value="custom">Custom Dates</option></select></label></div>
+<div class="period-date-range" id="homeCustomRange" hidden><label>From<input id="homeDateStart" type="date"></label><label>To<input id="homeDateEnd" type="date"></label><button id="homeApplyDates" type="button">Apply dates</button></div>
 <div class="leaderboard-grid home-leaderboard-single">
-<section id="homeMonthlyBoard" class="dashboard-card"><h3>This Month</h3><p>Points from sends logged this month.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Hardest Climb</th><th>Points</th></tr></thead><tbody id="monthlyLeaderboard"><tr><td colspan="5">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
+<section id="homeMonthlyBoard" class="dashboard-card"><h3 id="homePeriodTitle">This Month</h3><p id="homePeriodDescription">Points from sends logged this month.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Hardest Climb</th><th>Points</th></tr></thead><tbody id="monthlyLeaderboard"><tr><td colspan="5">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
 <section id="homeAllTimeBoard" class="dashboard-card" hidden><h3>All Time</h3><p>Total points across all recorded sends.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Hardest Climb</th><th>Points</th></tr></thead><tbody id="allTimeLeaderboard"><tr><td colspan="5">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
 </div>
 <h2 class="dashboard-heading">Climbing Gallery</h2>
@@ -208,6 +217,30 @@ button, input, select, textarea { max-width: 100%; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script>
 <script>
 let currentUser = null;
+
+function ukToday(offsetDays=0){
+ const london = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const parts=Object.fromEntries(london.map(p=>[p.type,p.value]));
+ const utc=new Date(Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day)+offsetDays));
+ return utc.toISOString().slice(0,10);
+}
+function validateDates(start,end){
+ if(!start||!end)throw new Error('Choose both a start and an end date.');
+ if(start>end)throw new Error('The start date must be on or before the end date.');
+ if(end>ukToday())throw new Error('The end date cannot be in the future.');
+}
+async function fetchPeriodLeaderboard(period,start,end){
+ if(period==='monthly'||period==='alltime'){
+  const view=period==='monthly'?'monthly_leaderboard_flashes':'leaderboard_flashes';
+  return await supabaseClient.from(view).select('id, username, total_sends, points, hardest_grade');
+ }
+ if(period==='last7'){start=ukToday(-6);end=ukToday();}
+ validateDates(start,end);
+ return await supabaseClient.rpc('leaderboard_for_dates',{start_date:start,end_date:end});
+}
+
+let homeAvatars = {};
+let homePeriodRequest = 0;
 function sortLeaderboard(rows) {
  return [...rows].sort((a,b)=>Number(b.points)-Number(a.points)||Number(b.total_sends)-Number(a.total_sends)||String(a.username).localeCompare(String(b.username)));
 }
@@ -265,6 +298,7 @@ async function loadDashboard() {
    if (avatarResult.error) console.warn('Could not load leaderboard photos:', avatarResult.error.message);
    else avatars = Object.fromEntries((avatarResult.data||[]).map(p=>[p.id,p.avatar_url]));
   }
+  homeAvatars = avatars;
   renderLeaderboard('monthlyLeaderboard',monthlyRows,avatars);
   renderLeaderboard('allTimeLeaderboard',allTimeRows,avatars);
  }catch(error){console.error(error);document.getElementById('dashboardMessage').textContent='Could not load dashboard: '+error.message;}
@@ -304,9 +338,49 @@ loadDashboard();loadHomeMap();
  const monthly=document.getElementById('homeMonthlyBoard');
  const allTime=document.getElementById('homeAllTimeBoard');
  if(!picker||!monthly||!allTime)return;
- function switchBoard(){const showAll=picker.value==='alltime';monthly.hidden=showAll;allTime.hidden=!showAll;}
- picker.addEventListener('change',switchBoard);
- switchBoard();
+ const datePanel=document.getElementById('homeCustomRange');
+ const from=document.getElementById('homeDateStart');
+ const to=document.getElementById('homeDateEnd');
+ from.value=ukToday(-6);to.value=ukToday();
+ from.max=ukToday();to.max=ukToday();
+ let cachedMonthlyHTML=null;
+ async function switchBoard(){
+  const period=picker.value;
+  const request=++homePeriodRequest;
+  const isAll=period==='alltime';
+  monthly.hidden=isAll;allTime.hidden=!isAll;
+  datePanel.hidden=period!=='custom';
+  if(isAll)return;
+  const title=document.getElementById('homePeriodTitle');
+  const description=document.getElementById('homePeriodDescription');
+  if(period==='monthly'){
+   title.textContent='This Month';description.textContent='Points from sends logged this month.';
+  }else if(period==='last7'){
+   title.textContent='Last 7 Days';description.textContent='Sends from the last 7 calendar days, including today.';
+  }else{
+   title.textContent='Custom Dates';description.textContent='Points earned within your selected dates.';
+  }
+  const tbody=document.getElementById('monthlyLeaderboard');
+  if(period==='custom'&&!datePanel.dataset.applied)return;
+  if(period==='monthly'&&cachedMonthlyHTML!==null){tbody.innerHTML=cachedMonthlyHTML;return;}
+  if(period==='monthly'&&cachedMonthlyHTML===null&&tbody.children.length&&tbody.textContent.indexOf('Loading')===-1)cachedMonthlyHTML=tbody.innerHTML;
+  tbody.innerHTML='<tr><td colspan="5">Loading...</td></tr>';
+  try{
+   const result=await fetchPeriodLeaderboard(period,from.value,to.value);
+   if(result.error)throw result.error;
+   if(request!==homePeriodRequest)return;
+   let rows=sortLeaderboard(result.data||[]);
+   let avatars={...homeAvatars};
+   const missing=rows.map(p=>p.id).filter(id=>id&&!Object.hasOwn(avatars,id));
+   if(missing.length){const response=await supabaseClient.from('profiles').select('id, avatar_url').in('id',missing);if(!response.error)for(const p of response.data||[])avatars[p.id]=p.avatar_url;}
+   if(request!==homePeriodRequest)return;
+   renderLeaderboard('monthlyLeaderboard',rows,avatars);
+  }catch(error){if(request!==homePeriodRequest)return;tbody.innerHTML='';const row=tbody.insertRow();const cell=row.insertCell();cell.colSpan=5;cell.textContent='Could not load leaderboard: '+error.message;}
+ }
+ picker.addEventListener('change',()=>{delete datePanel.dataset.applied;switchBoard();});
+ document.getElementById('homeApplyDates').addEventListener('click',()=>{datePanel.dataset.applied='yes';switchBoard();});
+ // Preserve the dashboard's original monthly board until a period is changed.
+ datePanel.hidden=true;monthly.hidden=false;allTime.hidden=true;
 })();
 </script>
 </body></html>
