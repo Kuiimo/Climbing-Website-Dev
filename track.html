@@ -1,12 +1,63 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Brushworks Tracker | Track Climbs</title>
+  <title>Climb Tracker | Track Climbs</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
+    /* MATCHING HEADER */
+    header {
+      background: #142133;
+      border-bottom: 1px solid #334155;
+    }
+
+    header .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    header .brand {
+      color: #66d9d5;
+      font-size: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    header .links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    header .links a {
+      display: inline-block;
+      background: #24364d;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    header .links a.active {
+      background: #35b8b5;
+      color: #081521;
+    }
+
+    header .links a:hover {
+      opacity: 0.9;
+    }
+
+    /* MAP */
     .map-container {
       position: relative;
       width: 100%;
@@ -26,7 +77,8 @@
       -webkit-user-drag: none;
     }
 
-    .climb-marker, .preview-marker {
+    .climb-marker,
+    .preview-marker {
       position: absolute;
       transform: translate(-50%, -50%);
       width: 36px;
@@ -63,9 +115,12 @@
     }
 
     @keyframes previewPulse {
-      50% { box-shadow: 0 0 0 8px #9ca3af55; }
+      50% {
+        box-shadow: 0 0 0 8px #9ca3af55;
+      }
     }
 
+    /* PANELS */
     .tracker-panel {
       background: #1f2937;
       color: white;
@@ -74,7 +129,9 @@
       margin-top: 20px;
     }
 
-    .tracker-panel h2 { margin-top: 0; }
+    .tracker-panel h2 {
+      margin-top: 0;
+    }
 
     .tracker-panel select,
     .tracker-panel button {
@@ -91,10 +148,11 @@
     }
 
     .tracker-panel button {
-      background: #3979ff;
-      color: white;
+      background: #35b8b5;
+      color: #081521;
       border: none;
       cursor: pointer;
+      font-weight: 700;
     }
 
     .tracker-panel button:disabled {
@@ -102,13 +160,32 @@
       cursor: not-allowed;
     }
 
-    .tracker-panel .secondary { background: #475569; }
-    .tracker-panel .success { background: #15803d; }
-    .tracker-panel .danger { background: #b91c1c; }
-    .hidden { display: none !important; }
-    .muted { color: #9ca3af; }
+    .tracker-panel .secondary {
+      background: #475569;
+      color: white;
+    }
 
-    #sendList { padding-left: 20px; }
+    .tracker-panel .success {
+      background: #15803d;
+      color: white;
+    }
+
+    .tracker-panel .danger {
+      background: #b91c1c;
+      color: white;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tracker-panel .muted {
+      color: #9ca3af;
+    }
+
+    #sendList {
+      padding-left: 20px;
+    }
 
     #trackerMessage {
       margin: 18px 0;
@@ -123,7 +200,9 @@
       margin: 15px 0;
     }
 
-    .tracker-links a { color: #93c5fd; }
+    .tracker-links a {
+      color: #66d9d5;
+    }
 
     .field-row {
       display: flex;
@@ -152,6 +231,18 @@
       gap: 6px;
       margin-top: 12px;
     }
+
+    @media (max-width: 700px) {
+      header .nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      header .links a {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 
@@ -159,7 +250,7 @@
   <header>
     <nav class="wrap nav">
       <a class="brand" href="index.html">
-        ⛰ BRUSHWORKS TRACKER
+        ⛰ CLIMB TRACKER
       </a>
 
       <div class="links">
@@ -172,13 +263,13 @@
   </header>
 
   <main class="wrap">
-    <div class="eyebrow">Your climbing gym</div>
+    <div class="eyebrow">YOUR CLIMBING GYM</div>
     <h1>Track Climbs</h1>
 
     <p>
-      Click the map to place a climb. A grey marker
-      shows where it will go before you save.
-      Click an existing climb to log your send or edit it.
+      Click the map to place a climb. A grey marker shows
+      where it will go before you save. Click an existing
+      climb to log your send or edit it.
     </p>
 
     <div class="tracker-links">
@@ -187,7 +278,7 @@
     </div>
 
     <section class="card">
-      <h2>Brushworks Gym Map</h2>
+      <h2>Gym Map</h2>
 
       <p class="muted">
         Markers match the hold colours.
@@ -198,7 +289,7 @@
         <img
           id="gymMap"
           src="images/gym-map.png"
-          alt="Top-down map of Brushworks climbing gym"
+          alt="Top-down map of the climbing gym"
           draggable="false"
         >
 
@@ -211,11 +302,11 @@
 
       <p class="muted">
         Click an empty spot to add a climb.
-        Click a coloured marker to view a climb.
+        Click a coloured marker to view its details.
       </p>
     </section>
 
-    <!-- CREATE CLIMB -->
+    <!-- ADD CLIMB -->
     <section id="addPanel" class="tracker-panel hidden">
       <h2>Add a New Climb</h2>
 
@@ -295,8 +386,7 @@
       <h2>Edit Climb</h2>
 
       <p class="muted">
-        Change the grade or hold colour.
-        You can also reposition the marker.
+        Change the grade, hold colour, or marker position.
       </p>
 
       <div class="field-row">
@@ -334,10 +424,10 @@
         </div>
       </div>
 
-      <div class="position-help" id="editPositionHelp">
-        The grey + shows the current position.
-        Click elsewhere on the map to move it.
-        The change won't be saved until you press Save Changes.
+      <div class="position-help">
+        The grey + shows the selected position.
+        Click another empty spot on the map to move it.
+        Nothing changes until you press Save Changes.
       </div>
 
       <div class="action-row">
@@ -532,7 +622,6 @@
 
           if (busy) return;
 
-          // Don't change the selected climb during editing
           if (mode === "edit") {
             showMessage(
               "You're editing a climb. Click an empty spot to move it, or cancel editing."
@@ -547,10 +636,8 @@
       });
     }
 
-    // CLICK THE MAP: CREATE OR REPOSITION
     mapContainer.addEventListener("click", event => {
       if (busy) return;
-
       if (event.target.closest(".climb-marker")) return;
 
       if (!currentUser || !currentProfile) {
@@ -593,7 +680,6 @@
       showMessage("");
     };
 
-    // SAVE NEW CLIMB
     document.getElementById("saveClimbBtn").onclick = async () => {
       if (!pendingPosition || !currentUser || busy) return;
 
@@ -640,7 +726,6 @@
       }
     };
 
-    // OPEN EXISTING CLIMB
     async function openClimb(climb) {
       selectedClimb = climb;
       pendingPosition = null;
@@ -649,15 +734,13 @@
       hidePanels();
       hidePreview();
 
-      document.getElementById("selectedGrade")
-        .textContent =
-          "V" + climb.grade + " — " +
-          climb.colour.charAt(0).toUpperCase() +
-          climb.colour.slice(1);
+      document.getElementById("selectedGrade").textContent =
+        "V" + climb.grade + " — " +
+        climb.colour.charAt(0).toUpperCase() +
+        climb.colour.slice(1);
 
-      document.getElementById("climbInfo")
-        .textContent =
-          climb.grade + " points per send";
+      document.getElementById("climbInfo").textContent =
+        climb.grade + " points per send";
 
       const sent = mySentClimbIds.has(climb.id);
 
@@ -667,7 +750,6 @@
       document.getElementById("removeSendBtn")
         .classList.toggle("hidden", !sent);
 
-      // Only the climb's creator can edit it
       const isCreator = climb.created_by === currentUser.id;
 
       document.getElementById("editClimbBtn")
@@ -692,7 +774,6 @@
         .select("user_id, profiles(username)")
         .eq("climb_id", climbId);
 
-      // Avoid displaying a previous climb's sends
       if (!selectedClimb || selectedClimb.id !== climbId) return;
 
       if (error) {
@@ -715,7 +796,6 @@
       });
     }
 
-    // LOG SEND
     document.getElementById("sendBtn").onclick = async () => {
       if (!selectedClimb || !currentUser || busy) return;
 
@@ -737,7 +817,6 @@
 
         mySentClimbIds.add(climb.id);
         renderMarkers();
-
         await openClimb(climb);
 
         showMessage(
@@ -754,7 +833,6 @@
       }
     };
 
-    // REMOVE SEND
     document.getElementById("removeSendBtn").onclick = async () => {
       if (!selectedClimb || !currentUser || busy) return;
 
@@ -788,7 +866,6 @@
       }
     };
 
-    // START EDITING
     document.getElementById("editClimbBtn").onclick = () => {
       if (!selectedClimb || busy) return;
 
@@ -820,7 +897,6 @@
       );
     };
 
-    // CANCEL EDITING
     document.getElementById("cancelEditBtn").onclick = () => {
       if (busy) return;
 
@@ -831,7 +907,6 @@
       if (climb) openClimb(climb);
     };
 
-    // SAVE EDITS
     document.getElementById("saveEditBtn").onclick = async () => {
       if (!selectedClimb || !pendingPosition || busy) return;
 
