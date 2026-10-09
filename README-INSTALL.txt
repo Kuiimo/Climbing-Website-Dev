@@ -1,14 +1,6 @@
-CLIMB TRACKER — DESKTOP 2.0
-===========================
-1. Keep a backup of your existing GitHub files.
-2. Upload the contents of this ZIP into the ROOT of Climbing-Website-Dev.
-3. Keep the icons folder as icons/ and desktop-overhaul.css beside index.html.
-4. Replace the HTML pages, manifest and service worker if GitHub prompts.
-5. Keep your existing style.css, supabase-config.js and images/ folder.
-6. Commit and hard refresh on desktop (Ctrl+Shift+R).
+CLIMB TRACKER DESKTOP 2.0 — REAL BRUSHWORKS PHOTOS
 
-The desktop redesign activates on screens wider than 900px.
-Mobile/PWA styling is intentionally unchanged.
-No SQL required. Supabase auth, sends, flash bonuses and date filters are untouched.
-The desktop Gallery now uses a three-column media feed; existing media records remain unchanged.
-Test on your actual GitHub Pages site before sharing widely.
+Upload ALL contents to the root of your GitHub repository, preserving the images/ and icons/ folders.
+Replace the HTML files and desktop-overhaul.css. Keep your existing images/gym-map.png, style.css and supabase-config.js.
+
+The three gym photos are used only as desktop banners. The interactive map and mobile layout are unchanged. No Supabase SQL is required.
