@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Climb Tracker | Login</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#142133">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Climb Tracker">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=6">
 
   <style>
     body {
@@ -212,6 +218,21 @@
         font-size: 28px;
       }
     }
+    /* Match the rest of Climb Tracker without changing authentication behaviour. */
+    header .nav { min-height: 68px; padding-top: 12px; padding-bottom: 12px; }
+    header a.brand { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; line-height: 1.2; color: #35b8b5; }
+    header a.brand .brand-logo { display: block; width: 36px; height: 36px; max-width: 36px; max-height: 36px; object-fit: contain; border-radius: 9px; flex: 0 0 36px; }
+    .login-icon { width: 72px; height: 72px; background: transparent; padding: 0; border-radius: 18px; overflow: hidden; }
+    .login-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .login-card { background: #18283b; border-color: #304358; }
+    .login-button { background: #35b8b5; }
+    .show-password, .text-button { color: #35b8b5; }
+    @media (max-width: 480px) {
+      header .nav { min-height: 56px; padding-top: 10px; padding-bottom: 10px; }
+      header a.brand { font-size: 14px; }
+      header a.brand .brand-logo { width: 30px; height: 30px; max-width: 30px; max-height: 30px; flex-basis: 30px; }
+      .login-main { padding: 24px 14px; min-height: calc(100vh - 120px); }
+    }
   </style>
 </head>
 
@@ -220,7 +241,8 @@
   <header>
     <nav class="wrap nav">
       <a class="brand" href="index.html">
-        ⛰ CLIMB TRACKER
+        <img class="brand-logo" src="icons/icon-192.png?v=6" alt="" aria-hidden="true">
+        <span>CLIMB TRACKER</span>
       </a>
     </nav>
   </header>
@@ -228,7 +250,7 @@
   <main class="login-main">
     <section class="login-card">
 
-      <div class="login-icon">⛰</div>
+      <div class="login-icon"><img src="icons/icon-192.png?v=6" alt="Climb Tracker mountain logo"></div>
 
       <h1 id="authHeading">Welcome Back</h1>
 
@@ -456,6 +478,11 @@
     }
 
     checkExistingLogin();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(console.warn));
+    }
   </script>
 
 </body>
