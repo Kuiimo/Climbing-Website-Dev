@@ -79,6 +79,12 @@ header .links a.active {
   font-weight: 800;
   flex-shrink: 0;
 }
+#avatar { overflow:hidden; position:relative; }
+#avatar img { width:100%;height:100%;object-fit:cover;display:block; }
+.profile-settings label { display:block;font-weight:700;margin:14px 0 6px; }
+.profile-settings input[type="text"], .profile-settings input[type="file"] { display:block;width:100%;max-width:420px;box-sizing:border-box;background:#101827;color:#f8fafc;border:1px solid #475569;border-radius:9px;padding:12px; }
+.profile-settings .profile-button { margin-top:12px; }
+.profile-settings .muted {font-size:14px;line-height:1.5;}
 .profile-name {
   font-size: clamp(30px, 5vw, 48px);
   margin: 0 0 8px;
@@ -217,6 +223,18 @@ header .links a.active {
           <p class="muted">Brushworks Climber</p>
         </div>
       </div>
+    </section>
+
+    <section class="profile-card profile-settings">
+      <h2>Edit My Profile</h2>
+      <label for="changeUsername">Change username</label>
+      <input id="changeUsername" type="text" minlength="2" maxlength="24" autocomplete="nickname" placeholder="Your username">
+      <button id="changeUsernameBtn" class="profile-button" type="button">Save Username</button>
+      <label for="profilePhotoInput">Profile photo</label>
+      <input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">
+      <p class="muted">Choose a JPG, PNG or WebP photo, up to 2 MB. Your profile picture is visible to other visitors who can access its link.</p>
+      <button id="uploadPhotoBtn" class="profile-button" type="button">Upload Photo</button>
+      <button id="removePhotoBtn" class="profile-button logout-button" type="button">Remove Photo</button>
     </section>
 
     <section class="profile-card">
@@ -407,7 +425,7 @@ async function initialiseProfile() {
     currentUser = auth.data.user;
 
     const result = await supabaseClient.from("profiles")
-      .select("id, username")
+      .select("id, username, avatar_url")
       .eq("id", currentUser.id)
       .maybeSingle();
 
@@ -421,8 +439,8 @@ async function initialiseProfile() {
     profile = result.data;
     document.getElementById("profileContent").hidden = false;
     document.getElementById("profileName").textContent = profile.username;
-    document.getElementById("avatar").textContent =
-      profile.username.charAt(0).toUpperCase();
+    document.getElementById("changeUsername").value = profile.username;
+    displayAvatar();
 
     await loadStats();
 
@@ -431,6 +449,83 @@ async function initialiseProfile() {
     profileMessage("Could not load profile: " + error.message);
   }
 }
+
+function displayAvatar() {
+  const avatar = document.getElementById("avatar");
+  avatar.replaceChildren();
+  if (profile?.avatar_url) {
+    const img = document.createElement("img");
+    img.alt = "Profile photo";
+    img.src = profile.avatar_url;
+    img.onerror = () => { avatar.replaceChildren(); avatar.textContent = profile.username.charAt(0).toUpperCase(); };
+    avatar.appendChild(img);
+  } else {
+    avatar.textContent = profile?.username?.charAt(0).toUpperCase() || "?";
+  }
+}
+
+document.getElementById("changeUsernameBtn").onclick = async () => {
+  if (!currentUser || !profile) return;
+  const name = document.getElementById("changeUsername").value.trim();
+  if (name.length < 2 || name.length > 24) {
+    profileMessage("Username must be between 2 and 24 characters."); return;
+  }
+  const button = document.getElementById("changeUsernameBtn");
+  button.disabled = true;
+  try {
+    const { error } = await supabaseClient.from("profiles")
+      .update({ username: name }).eq("id", currentUser.id);
+    if (error) throw error;
+    profile.username = name;
+    document.getElementById("profileName").textContent = name;
+    displayAvatar();
+    profileMessage("Username updated! Your new name will appear on leaderboards when refreshed.");
+  } catch (error) { profileMessage("Could not change username: " + error.message); }
+  finally { button.disabled = false; }
+};
+
+document.getElementById("uploadPhotoBtn").onclick = async () => {
+  if (!currentUser || !profile) return;
+  const file = document.getElementById("profilePhotoInput").files[0];
+  if (!file) { profileMessage("Choose a photo first."); return; }
+  const extensions = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
+  const ext = extensions[file.type];
+  if (!ext) { profileMessage("Please use a JPG, PNG or WebP image."); return; }
+  if (file.size > 2 * 1024 * 1024) { profileMessage("Photo must be 2 MB or smaller."); return; }
+  const button = document.getElementById("uploadPhotoBtn");
+  button.disabled = true;
+  profileMessage("Uploading photo...");
+  try {
+    const path = currentUser.id + "/avatar." + ext;
+    const { error: uploadError } = await supabaseClient.storage
+      .from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadError) throw uploadError;
+    const { data } = supabaseClient.storage.from("avatars").getPublicUrl(path);
+    const url = data.publicUrl + "?v=" + Date.now();
+    const { error: updateError } = await supabaseClient.from("profiles")
+      .update({ avatar_url: url }).eq("id", currentUser.id);
+    if (updateError) throw updateError;
+    profile.avatar_url = url;
+    displayAvatar();
+    profileMessage("Profile photo updated!");
+  } catch (error) { profileMessage("Could not upload photo: " + error.message); }
+  finally { button.disabled = false; }
+};
+
+document.getElementById("removePhotoBtn").onclick = async () => {
+  if (!currentUser || !profile) return;
+  const button = document.getElementById("removePhotoBtn");
+  button.disabled = true;
+  try {
+    const { error } = await supabaseClient.from("profiles")
+      .update({ avatar_url: null }).eq("id", currentUser.id);
+    if (error) throw error;
+    profile.avatar_url = null;
+    displayAvatar();
+    profileMessage("Profile photo removed from your profile.");
+  } catch (error) { profileMessage("Could not remove photo: " + error.message); }
+  finally { button.disabled = false; }
+};
 
 document.getElementById("saveUsernameBtn").onclick = async () => {
   const username = document.getElementById("usernameInput").value.trim();
