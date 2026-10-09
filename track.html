@@ -3,18 +3,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Climb Tracker | Track Climbs</title>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 
   <style>
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
-    /* NAVIGATION */
     header {
       background: #142133;
       border-bottom: 1px solid #334155;
@@ -52,6 +47,7 @@
       padding: 12px 18px;
       border-radius: 10px;
       font-weight: 700;
+      text-decoration: none;
     }
 
     header .links a.active {
@@ -59,7 +55,6 @@
       color: #081521;
     }
 
-    /* ZOOM TOOLBAR */
     .map-toolbar {
       display: flex;
       align-items: center;
@@ -79,6 +74,7 @@
       font-size: 20px;
       font-weight: 800;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .zoom-button:disabled {
@@ -99,7 +95,7 @@
       text-align: center;
     }
 
-    /* INTERACTIVE MAP */
+    /* The entire map fits at 100%. */
     .map-viewport {
       position: relative;
       width: 100%;
@@ -108,8 +104,6 @@
       background: #111827;
       border: 1px solid #385069;
       border-radius: 14px;
-
-      /* Allow our code to handle pinch and drag */
       touch-action: none;
       overscroll-behavior: contain;
       cursor: grab;
@@ -119,45 +113,63 @@
       cursor: grabbing;
     }
 
+    /* Only the IMAGE is zoomed. Markers
+       live in a separate, unscaled layer. */
     .map-container {
       position: absolute;
       left: 0;
       top: 0;
       width: 100%;
-      max-width: none;
+      height: 100%;
       overflow: visible;
       line-height: 0;
-      transform-origin: 0 0;
-      will-change: transform;
-      background: #111827;
+      background: transparent;
+      pointer-events: none;
     }
 
-    .map-container img {
+    #gymMap {
+      position: absolute;
+      left: 0;
+      top: 0;
       display: block;
-      width: 100%;
+      width: auto;
       height: auto;
       max-width: none;
+      transform-origin: 0 0;
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
     }
 
+    /* Markers are positioned using JavaScript
+       in screen pixels, so their size never
+       changes when the map is zoomed. */
     .climb-marker,
     .preview-marker {
       position: absolute;
       transform: translate(-50%, -50%);
       width: 36px;
       height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
       border-radius: 50%;
       border: 2px solid white;
       font-size: 11px;
       font-weight: 800;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 2;
       box-shadow: 0 2px 8px #0009;
     }
 
     .climb-marker {
       cursor: pointer;
+      pointer-events: auto;
       touch-action: none;
     }
 
@@ -184,7 +196,6 @@
       line-height: 1.6;
     }
 
-    /* TRACKER PANELS */
     .tracker-panel {
       background: #1f2937;
       border: 1px solid #334155;
@@ -299,8 +310,7 @@
 
       header .links {
         display: grid;
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
       }
 
@@ -351,9 +361,7 @@
           Track Climbs
         </a>
         <a href="profile.html">My Profile</a>
-        <a href="leaderboard.html">
-          Leaderboard
-        </a>
+        <a href="leaderboard.html">Leaderboard</a>
       </div>
     </nav>
   </header>
@@ -369,9 +377,7 @@
 
     <div class="tracker-links">
       <a href="profile.html">My Profile</a>
-      <a href="leaderboard.html">
-        View Leaderboard
-      </a>
+      <a href="leaderboard.html">View Leaderboard</a>
     </div>
 
     <section class="card">
@@ -407,8 +413,8 @@
       </div>
 
       <p class="map-hint">
-        📱 Phone: pinch to zoom and drag to move.
-        🖱 Computer: scroll to zoom at your cursor,
+        Phone: pinch to zoom and drag to move.
+        Computer: scroll to zoom at your cursor,
         then drag to move.
       </p>
 
@@ -435,10 +441,7 @@
     </section>
 
     <!-- ADD CLIMB -->
-    <section
-      id="addPanel"
-      class="tracker-panel hidden"
-    >
+    <section id="addPanel" class="tracker-panel hidden">
       <h2>Add a New Climb</h2>
 
       <div class="position-help">
@@ -449,9 +452,7 @@
 
       <div class="field-row">
         <div>
-          <label for="gradeSelect">
-            Climb grade
-          </label>
+          <label for="gradeSelect">Climb grade</label>
           <select id="gradeSelect">
             <option value="0">V0</option>
             <option value="1">V1</option>
@@ -468,9 +469,7 @@
         </div>
 
         <div>
-          <label for="colourSelect">
-            Hold colour
-          </label>
+          <label for="colourSelect">Hold colour</label>
           <select id="colourSelect">
             <option value="red">Red</option>
             <option value="blue">Blue</option>
@@ -487,58 +486,42 @@
       </div>
 
       <div class="action-row">
-        <button id="saveClimbBtn">
-          Save Climb
+        <button id="saveClimbBtn">Save Climb</button>
+        <button id="cancelAddBtn" class="secondary">
+          Cancel
         </button>
-        <button
-          id="cancelAddBtn"
-          class="secondary"
-        >Cancel</button>
       </div>
     </section>
 
     <!-- VIEW CLIMB -->
-    <section
-      id="climbPanel"
-      class="tracker-panel hidden"
-    >
-      <h2 id="selectedGrade">
-        Climb Details
-      </h2>
-
+    <section id="climbPanel" class="tracker-panel hidden">
+      <h2 id="selectedGrade">Climb Details</h2>
       <p id="climbInfo" class="muted"></p>
 
       <h3>Climbers who sent this</h3>
       <ul id="sendList"></ul>
 
       <div class="action-row">
-        <button
-          id="sendBtn"
-          class="success"
-        >Mark as Sent</button>
+        <button id="sendBtn" class="success">
+          Mark as Sent
+        </button>
 
-        <button
-          id="removeSendBtn"
-          class="danger hidden"
-        >Remove My Send</button>
+        <button id="removeSendBtn" class="danger hidden">
+          Remove My Send
+        </button>
 
-        <button
-          id="editClimbBtn"
-          class="secondary hidden"
-        >Edit Climb</button>
+        <button id="editClimbBtn" class="secondary hidden">
+          Edit Climb
+        </button>
 
-        <button
-          id="closeClimbBtn"
-          class="secondary"
-        >Close</button>
+        <button id="closeClimbBtn" class="secondary">
+          Close
+        </button>
       </div>
     </section>
 
     <!-- EDIT CLIMB -->
-    <section
-      id="editPanel"
-      class="tracker-panel hidden"
-    >
+    <section id="editPanel" class="tracker-panel hidden">
       <h2>Edit Climb</h2>
 
       <p class="muted">
@@ -548,9 +531,7 @@
 
       <div class="field-row">
         <div>
-          <label for="editGradeSelect">
-            Climb grade
-          </label>
+          <label for="editGradeSelect">Climb grade</label>
           <select id="editGradeSelect">
             <option value="0">V0</option>
             <option value="1">V1</option>
@@ -567,9 +548,7 @@
         </div>
 
         <div>
-          <label for="editColourSelect">
-            Hold colour
-          </label>
+          <label for="editColourSelect">Hold colour</label>
           <select id="editColourSelect">
             <option value="red">Red</option>
             <option value="blue">Blue</option>
@@ -587,19 +566,15 @@
 
       <div class="position-help">
         The grey + shows the current position.
-        Zoom in and tap another empty spot
-        to move it. Nothing changes until
-        you save.
+        Zoom in and tap another empty spot to move it.
+        Nothing changes until you save.
       </div>
 
       <div class="action-row">
-        <button id="saveEditBtn">
-          Save Changes
+        <button id="saveEditBtn">Save Changes</button>
+        <button id="cancelEditBtn" class="secondary">
+          Cancel Editing
         </button>
-        <button
-          id="cancelEditBtn"
-          class="secondary"
-        >Cancel Editing</button>
       </div>
     </section>
 
@@ -662,9 +637,8 @@
     }
 
     function showPreview(position) {
-      preview.style.left = position.x + "%";
-      preview.style.top = position.y + "%";
       preview.classList.remove("hidden");
+      positionMarker(preview, position.x, position.y);
     }
 
     function clearSelection() {
@@ -675,12 +649,12 @@
       preview.classList.add("hidden");
     }
 
-    /* ====================================
-       PINCH, WHEEL AND DRAG MAP ENGINE
-       ==================================== */
+    /* ===================================
+       MAP ENGINE
+       =================================== */
 
     const MIN_SCALE = 1;
-    const MAX_SCALE = 5;
+    const MAX_SCALE = 6;
 
     let scale = 1;
     let offsetX = 0;
@@ -692,8 +666,9 @@
     const pointers = new Map();
 
     let gestureStart = null;
-    let moved = false;
-    let suppressClick = false;
+    let gestureMoved = false;
+    let gestureWasPinch = false;
+    let activePointerTarget = null;
 
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -706,6 +681,41 @@
         x: clientX - rect.left,
         y: clientY - rect.top
       };
+    }
+
+    /* Convert a saved percentage position
+       into a screen position. The marker
+       remains 36px even at 600% zoom. */
+    function positionMarker(marker, xPercent, yPercent) {
+      marker.style.left =
+        (offsetX + xPercent / 100 * mapWidth * scale)
+        + "px";
+
+      marker.style.top =
+        (offsetY + yPercent / 100 * mapHeight * scale)
+        + "px";
+    }
+
+    function positionAllMarkers() {
+      map.querySelectorAll(".climb-marker")
+        .forEach(marker => {
+          positionMarker(
+            marker,
+            Number(marker.dataset.x),
+            Number(marker.dataset.y)
+          );
+        });
+
+      if (
+        pendingPosition &&
+        !preview.classList.contains("hidden")
+      ) {
+        positionMarker(
+          preview,
+          pendingPosition.x,
+          pendingPosition.y
+        );
+      }
     }
 
     function limitOffsets() {
@@ -736,10 +746,13 @@
       }
     }
 
-    function renderTransform() {
+    function renderMap() {
       limitOffsets();
 
-      map.style.transform =
+      image.style.width = mapWidth + "px";
+      image.style.height = mapHeight + "px";
+
+      image.style.transform =
         "translate(" +
         offsetX + "px," +
         offsetY + "px) scale(" +
@@ -753,8 +766,11 @@
 
       $("zoomOutBtn").disabled =
         scale <= MIN_SCALE;
+
+      positionAllMarkers();
     }
 
+    /* Zoom around cursor/finger position. */
     function zoomAt(newScale, x, y) {
       newScale = clamp(
         newScale,
@@ -762,19 +778,15 @@
         MAX_SCALE
       );
 
-      const oldScale = scale;
-
-      /* Keep the map point under the
-         cursor/fingers in the same place. */
-      const mapX = (x - offsetX) / oldScale;
-      const mapY = (y - offsetY) / oldScale;
+      const mapX = (x - offsetX) / scale;
+      const mapY = (y - offsetY) / scale;
 
       scale = newScale;
 
       offsetX = x - mapX * scale;
       offsetY = y - mapY * scale;
 
-      renderTransform();
+      renderMap();
     }
 
     function zoomCentre(factor) {
@@ -797,11 +809,10 @@
       scale = 1;
       offsetX = 0;
       offsetY = 0;
-      renderTransform();
+      renderMap();
     };
 
-    /* MOUSE WHEEL:
-       zoom around the exact cursor point. */
+    /* Mouse wheel zooms toward cursor. */
     viewport.addEventListener(
       "wheel",
       event => {
@@ -812,9 +823,8 @@
           event.clientY
         );
 
-        const factor = Math.exp(
-          -event.deltaY * 0.002
-        );
+        const factor =
+          Math.exp(-event.deltaY * 0.002);
 
         zoomAt(
           scale * factor,
@@ -866,10 +876,13 @@
           mapY: (centre.y - offsetY) / scale
         };
 
-        moved = true;
-        suppressClick = true;
+        gestureWasPinch = true;
       }
     }
+
+    /* ===================================
+       POINTER EVENTS
+       =================================== */
 
     viewport.addEventListener(
       "pointerdown",
@@ -881,6 +894,12 @@
           return;
         }
 
+        if (pointers.size === 0) {
+          gestureMoved = false;
+          gestureWasPinch = false;
+          activePointerTarget = event.target;
+        }
+
         pointers.set(
           event.pointerId,
           viewportPoint(
@@ -889,9 +908,10 @@
           )
         );
 
-        if (pointers.size === 1) {
-          moved = false;
-          suppressClick = false;
+        try {
+          viewport.setPointerCapture(event.pointerId);
+        } catch (error) {
+          /* Capture may be unavailable. */
         }
 
         startGesture();
@@ -931,19 +951,18 @@
             Math.abs(dx) > 5 ||
             Math.abs(dy) > 5
           ) {
-            moved = true;
-            suppressClick = true;
+            gestureMoved = true;
             viewport.classList.add("dragging");
           }
 
-          if (moved) {
+          if (gestureMoved) {
             offsetX =
               gestureStart.offsetX + dx;
 
             offsetY =
               gestureStart.offsetY + dy;
 
-            renderTransform();
+            renderMap();
           }
         }
 
@@ -977,10 +996,10 @@
             centre.y -
             gestureStart.mapY * scale;
 
-          moved = true;
-          suppressClick = true;
+          gestureMoved = true;
+          gestureWasPinch = true;
 
-          renderTransform();
+          renderMap();
         }
       }
     );
@@ -990,15 +1009,37 @@
         return;
       }
 
+      const point = viewportPoint(
+        event.clientX,
+        event.clientY
+      );
+
       pointers.delete(event.pointerId);
 
       viewport.classList.remove("dragging");
 
       if (pointers.size > 0) {
         startGesture();
-      } else {
-        gestureStart = null;
+        return;
       }
+
+      /* A simple tap selects or adds a climb.
+         A drag or pinch never does. */
+      if (
+        !gestureMoved &&
+        !gestureWasPinch &&
+        event.type === "pointerup"
+      ) {
+        handleMapTap(
+          point,
+          activePointerTarget
+        );
+      }
+
+      gestureStart = null;
+      activePointerTarget = null;
+      gestureMoved = false;
+      gestureWasPinch = false;
     }
 
     viewport.addEventListener(
@@ -1011,49 +1052,48 @@
       endPointer
     );
 
-    /* Stop a drag or pinch from
-       accidentally selecting a climb. */
+    /* Prevent the browser's synthetic click
+       from triggering a second action. */
     viewport.addEventListener(
       "click",
       event => {
-        if (suppressClick || moved) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-
-          suppressClick = false;
-          moved = false;
-        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
       },
       true
     );
 
-    /* When the image loads, calculate
-       its actual displayed dimensions. */
+    /* ===================================
+       MAP SIZE: FIT THE ENTIRE IMAGE
+       =================================== */
+
     function sizeMap() {
       const oldWidth = mapWidth;
       const oldHeight = mapHeight;
 
       const centreX = oldWidth
-        ? (viewport.clientWidth / 2 - offsetX)
-          / (oldWidth * scale)
+        ? (viewport.clientWidth / 2 - offsetX) /
+          (oldWidth * scale)
         : 0.5;
 
       const centreY = oldHeight
-        ? (viewport.clientHeight / 2 - offsetY)
-          / (oldHeight * scale)
+        ? (viewport.clientHeight / 2 - offsetY) /
+          (oldHeight * scale)
         : 0.5;
-
-      mapWidth = viewport.clientWidth;
 
       const ratio =
         image.naturalWidth && image.naturalHeight
           ? image.naturalHeight / image.naturalWidth
           : 1;
 
-      mapHeight = mapWidth * ratio;
+      /* This is the key fix:
+         fit the image within BOTH dimensions. */
+      mapWidth = Math.min(
+        viewport.clientWidth,
+        viewport.clientHeight / ratio
+      );
 
-      map.style.width = mapWidth + "px";
-      map.style.height = mapHeight + "px";
+      mapHeight = mapWidth * ratio;
 
       offsetX =
         viewport.clientWidth / 2 -
@@ -1063,7 +1103,7 @@
         viewport.clientHeight / 2 -
         centreY * mapHeight * scale;
 
-      renderTransform();
+      renderMap();
     }
 
     image.addEventListener("load", sizeMap);
@@ -1073,15 +1113,9 @@
       sizeMap();
     }
 
-    /* Convert screen taps to the
-       original 0–100% database coordinates,
-       even after pinch/drag/zoom. */
-    function mapPosition(event) {
-      const point = viewportPoint(
-        event.clientX,
-        event.clientY
-      );
-
+    /* Convert screen position into the
+       original 0–100% database coordinates. */
+    function mapPosition(point) {
       const x =
         (point.x - offsetX) /
         (mapWidth * scale) * 100;
@@ -1096,19 +1130,16 @@
       };
     }
 
-    /* ====================================
+    /* ===================================
        SUPABASE LOGIN AND DATA
-       ==================================== */
+       =================================== */
 
     async function initialiseTracker() {
       try {
         const auth =
           await supabaseClient.auth.getUser();
 
-        if (
-          auth.error ||
-          !auth.data.user
-        ) {
+        if (auth.error || !auth.data.user) {
           window.location.replace("login.html");
           return;
         }
@@ -1131,7 +1162,6 @@
         }
 
         currentProfile = profile.data;
-
         await loadClimbs();
 
       } catch (error) {
@@ -1180,9 +1210,9 @@
       renderMarkers();
     }
 
-    /* ====================================
+    /* ===================================
        COLOURED CLIMB MARKERS
-       ==================================== */
+       =================================== */
 
     function renderMarkers() {
       map.querySelectorAll(".climb-marker")
@@ -1211,11 +1241,9 @@
             ? "#111827"
             : "#ffffff";
 
-        marker.style.left =
-          climb.x_position + "%";
-
-        marker.style.top =
-          climb.y_position + "%";
+        marker.dataset.x = climb.x_position;
+        marker.dataset.y = climb.y_position;
+        marker.dataset.climbId = climb.id;
 
         marker.textContent =
           sent ? "✓" : "V" + climb.grade;
@@ -1230,83 +1258,96 @@
           marker.title
         );
 
-        marker.addEventListener(
-          "click",
-          event => {
-            event.stopPropagation();
-
-            if (busy) return;
-
-            if (mode === "edit") {
-              message(
-                "Tap an empty spot to reposition the climb."
-              );
-              return;
-            }
-
-            openClimb(climb);
-          }
-        );
-
         map.appendChild(marker);
       });
+
+      positionAllMarkers();
     }
 
-    /* ====================================
-       MAP TAPS AND ADD CLIMBS
-       ==================================== */
+    /* ===================================
+       MAP TAP HANDLING
+       =================================== */
 
-    map.addEventListener(
-      "click",
-      event => {
-        if (busy) return;
+    function handleMapTap(point, target) {
+      if (busy) return;
 
-        if (
-          event.target.closest(".climb-marker")
-        ) {
-          return;
-        }
+      if (!currentUser || !currentProfile) {
+        message(
+          "Please log in and create a profile first."
+        );
+        return;
+      }
 
-        if (
-          !currentUser ||
-          !currentProfile
-        ) {
-          message(
-            "Please log in and create a profile first."
-          );
-          return;
-        }
+      const marker = target?.closest?.(
+        ".climb-marker"
+      );
 
-        const position = mapPosition(event);
-
+      if (marker) {
         if (mode === "edit") {
-          pendingPosition = position;
-          showPreview(position);
-
           message(
-            "New position selected. Save Changes when ready."
+            "Tap an empty spot to reposition the climb."
           );
           return;
         }
 
-        mode = "add";
-        selectedClimb = null;
-        pendingPosition = position;
+        const climb = climbs.find(
+          item => String(item.id) ===
+            marker.dataset.climbId
+        );
 
-        hidePanels();
-        addPanel.classList.remove("hidden");
+        if (climb) {
+          openClimb(climb);
+        }
+
+        return;
+      }
+
+      /* Ignore taps outside the actual map
+         (in the empty margins at 100%). */
+      const mapX =
+        (point.x - offsetX) / scale;
+
+      const mapY =
+        (point.y - offsetY) / scale;
+
+      if (
+        mapX < 0 ||
+        mapY < 0 ||
+        mapX > mapWidth ||
+        mapY > mapHeight
+      ) {
+        return;
+      }
+
+      const position = mapPosition(point);
+
+      if (mode === "edit") {
+        pendingPosition = position;
         showPreview(position);
 
         message(
-          "Position selected. Zoom in to refine it, or save your climb."
+          "New position selected. Save Changes when ready."
         );
-
-        addPanel.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest"
-        });
+        return;
       }
-    );
+
+      mode = "add";
+      selectedClimb = null;
+      pendingPosition = position;
+
+      hidePanels();
+      addPanel.classList.remove("hidden");
+      showPreview(position);
+
+      message(
+        "Position selected. Zoom in to refine it, or save your climb."
+      );
+
+      addPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }
 
     $("cancelAddBtn").onclick = () => {
       if (busy) return;
@@ -1369,9 +1410,9 @@
       }
     };
 
-    /* ====================================
+    /* ===================================
        VIEW CLIMB
-       ==================================== */
+       =================================== */
 
     async function openClimb(climb) {
       selectedClimb = climb;
@@ -1466,9 +1507,9 @@
       });
     }
 
-    /* ====================================
+    /* ===================================
        LOG SEND
-       ==================================== */
+       =================================== */
 
     $("sendBtn").onclick = async () => {
       if (
@@ -1518,9 +1559,9 @@
       }
     };
 
-    /* ====================================
+    /* ===================================
        REMOVE SEND
-       ==================================== */
+       =================================== */
 
     $("removeSendBtn").onclick = async () => {
       if (
@@ -1568,9 +1609,9 @@
       }
     };
 
-    /* ====================================
+    /* ===================================
        EDIT CLIMB
-       ==================================== */
+       =================================== */
 
     $("editClimbBtn").onclick = () => {
       if (!selectedClimb || busy) return;
@@ -1641,6 +1682,7 @@
       }
 
       const climbId = selectedClimb.id;
+
       const position = {
         ...pendingPosition
       };
