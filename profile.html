@@ -305,12 +305,42 @@ button, input, select, textarea { max-width: 100%; }
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Climb Tracker">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=4">
-</head>
+<style id="header-logo-size-repair">
+/* Header layout repair: logo must never inherit oversized image styling. */
+header .nav { min-height:70px; gap:22px; }
+header a.brand, header .brand { display:inline-flex !important; flex:0 0 auto; align-items:center !important; gap:10px !important; width:auto !important; min-width:0; line-height:1.15; font-size:16px !important; white-space:nowrap; }
+header a.brand img.brand-logo, header .brand img.brand-logo { display:block !important; width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; max-width:40px !important; max-height:40px !important; flex:0 0 40px !important; object-fit:cover !important; border-radius:11px !important; margin:0 !important; padding:0 !important; }
+header .links { margin-left:auto; }
+@media (min-width:721px) {
+ header .nav { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:space-between !important; padding-top:12px !important; padding-bottom:12px !important; }
+ header .links { display:flex !important; align-items:center !important; justify-content:flex-end !important; }
+}
+@media (max-width:720px) {
+ header .nav { min-height:58px; padding-top:9px !important; padding-bottom:9px !important; }
+ header a.brand img.brand-logo, header .brand img.brand-logo { width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; max-width:32px !important; max-height:32px !important; flex-basis:32px !important; border-radius:9px !important; }
+ header a.brand, header .brand { font-size:14px !important; }
+}
+</style>
+<style id="consistent-brand-header-v5">
+/* Same navy and teal across desktop, mobile and app icon. */
+:root { --header:#142133; --teal:#35b8b5; --teal-light:#35b8b5; }
+header { background:#142133 !important; border-bottom:1px solid #334155 !important; }
+header .nav { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:space-between !important; gap:18px !important; min-height:66px !important; padding-top:10px !important; padding-bottom:10px !important; }
+header a.brand,header .brand { display:inline-flex !important; align-items:center !important; gap:10px !important; color:#35b8b5 !important; font-size:16px !important; font-weight:800 !important; line-height:1.2 !important; letter-spacing:.025em !important; width:auto !important; flex:0 0 auto !important; white-space:nowrap !important; }
+header .brand img.brand-logo { display:block !important; width:36px !important; height:36px !important; min-width:36px !important; min-height:36px !important; max-width:36px !important; max-height:36px !important; flex:0 0 36px !important; border-radius:9px !important; object-fit:contain !important; margin:0 !important; padding:0 !important; }
+header .links { margin-left:auto !important; }
+header .links a.active { background:#35b8b5 !important; color:#081521 !important; }
+@media(max-width:700px) {
+ header .nav { min-height:56px !important; padding-top:8px !important; padding-bottom:8px !important; }
+ header .brand img.brand-logo { width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; max-width:30px !important; max-height:30px !important; flex-basis:30px !important; border-radius:8px !important; }
+ header a.brand,header .brand { font-size:14px !important; }
+}
+</style></head>
 
 <body>
 <header>
   <nav class="wrap nav">
-    <a class="brand" href="index.html"><img class="brand-logo" src="icons/icon-192.png?v=4" alt="" aria-hidden="true"> CLIMB TRACKER</a>
+    <a class="brand" href="index.html"><img class="brand-logo" src="icons/icon-192.png?v=5" alt="" aria-hidden="true"> CLIMB TRACKER</a>
     <div class="links">
       <a href="index.html">Home</a>
       <a href="track.html">Track Climbs</a>

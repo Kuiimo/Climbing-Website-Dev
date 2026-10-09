@@ -1,5 +1,9 @@
-TEAL MOUNTAIN LOGO UPDATE
+BRANDING UPDATE — 9 October 2026
 
-No yellow circle. The home screen icon and header now use the same teal mountain logo. Gallery rounding fixes from the previous update are preserved.
+Upload the HTML files, icons folder, manifest.webmanifest and service-worker.js to the ROOT of your GitHub repository, replacing matching files.
 
-Upload all files and the icons folder to the root of your GitHub repository. Replace existing files and commit. If the iPhone icon remains old, remove the installed app and add it to the home screen again using Safari.
+The website header now uses the same navy (#142133) and teal (#35b8b5) on desktop and mobile, with a small teal-only mountain icon. No Supabase changes.
+
+IMPORTANT: login.html was NOT included in the source files available for this update, so it has NOT been changed. Send your current login.html to have its styling/logo updated without breaking authentication. Do not replace or delete your existing login.html.
+
+Keep existing style.css and supabase-config.js.

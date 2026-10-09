@@ -1,1 +1,17 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142133"><title>Brushworks — Offline</title><style>body{margin:0;min-height:100vh;background:#142133;color:#eef8fa;font:16px system-ui;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}main{max-width:360px}a{color:#6be2d4}</style></head><body><main><h1>You're offline</h1><p>Connect to the internet to load climbs, leaderboards and gallery posts.</p><a href="./index.html">Try again</a></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142133"><title>Brushworks — Offline</title><style>body{margin:0;min-height:100vh;background:#142133;color:#eef8fa;font:16px system-ui;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}main{max-width:360px}a{color:#6be2d4}</style><style id="header-logo-size-repair">
+/* Header layout repair: logo must never inherit oversized image styling. */
+header .nav { min-height:70px; gap:22px; }
+header a.brand, header .brand { display:inline-flex !important; flex:0 0 auto; align-items:center !important; gap:10px !important; width:auto !important; min-width:0; line-height:1.15; font-size:16px !important; white-space:nowrap; }
+header a.brand img.brand-logo, header .brand img.brand-logo { display:block !important; width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; max-width:40px !important; max-height:40px !important; flex:0 0 40px !important; object-fit:cover !important; border-radius:11px !important; margin:0 !important; padding:0 !important; }
+header .links { margin-left:auto; }
+@media (min-width:721px) {
+ header .nav { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:space-between !important; padding-top:12px !important; padding-bottom:12px !important; }
+ header .links { display:flex !important; align-items:center !important; justify-content:flex-end !important; }
+}
+@media (max-width:720px) {
+ header .nav { min-height:58px; padding-top:9px !important; padding-bottom:9px !important; }
+ header a.brand img.brand-logo, header .brand img.brand-logo { width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important; max-width:32px !important; max-height:32px !important; flex-basis:32px !important; border-radius:9px !important; }
+ header a.brand, header .brand { font-size:14px !important; }
+}
+</style>
+</head><body><main><h1>You're offline</h1><p>Connect to the internet to load climbs, leaderboards and gallery posts.</p><a href="./index.html">Try again</a></main></body></html>
