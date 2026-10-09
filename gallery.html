@@ -177,7 +177,42 @@ header .links a.active { background:#35b8b5 !important; color:#081521 !important
  header .brand img.brand-logo { width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; max-width:30px !important; max-height:30px !important; flex-basis:30px !important; border-radius:8px !important; }
  header a.brand,header .brand { font-size:14px !important; }
 }
-</style><link rel="stylesheet" href="desktop-overhaul.css?v=1"></head><body><header><nav class="wrap nav"><a class="brand" href="index.html"><img class="brand-logo" src="icons/icon-192.png?v=5" alt="" aria-hidden="true"> CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
+</style><link rel="stylesheet" href="desktop-overhaul.css?v=1">
+<style id="gallery-expanded-post-style">
+/* Full post viewer on desktop and mobile. */
+#feed .post{cursor:pointer;transition:transform .18s ease,border-color .18s ease}
+#feed .post:hover{border-color:#38bdb7!important}
+#feed .post:focus-visible{outline:3px solid #35b8b5;outline-offset:3px}
+#feed .post-media{cursor:zoom-in}
+.gallery-lightbox[hidden]{display:none!important}
+.gallery-lightbox{position:fixed;inset:0;z-index:5000;background:rgba(3,9,18,.94);display:flex;align-items:center;justify-content:center;padding:clamp(12px,3vw,40px);overscroll-behavior:contain}
+.gallery-lightbox-panel{position:relative;display:flex;flex-direction:column;width:min(100%,1020px);max-height:calc(100dvh - 30px);background:#142133;border:1px solid #36566c;border-radius:22px;overflow:hidden;box-shadow:0 28px 100px #000b}
+.gallery-lightbox-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #30485b}
+.gallery-lightbox-head .user-link{min-width:0}
+.gallery-lightbox-close{flex:none;width:44px;height:44px;border:1px solid #527086;border-radius:12px;background:#223a4d;color:white;font-size:28px;line-height:1;cursor:pointer}
+.gallery-lightbox-media{display:flex;align-items:center;justify-content:center;min-height:0;overflow:auto;background:#050b14}
+.gallery-lightbox-media img,.gallery-lightbox-media video{display:block;max-width:100%;max-height:min(70dvh,780px);width:auto;height:auto;object-fit:contain}
+.gallery-lightbox-meta{padding:15px 19px;border-top:1px solid #30485b}
+.gallery-lightbox-meta h2{font-size:19px;margin:0 0 5px}
+.gallery-lightbox-meta p{margin:0;color:#a9bfd1;font-size:13px}
+body.gallery-lightbox-open{overflow:hidden!important}
+@media(max-width:720px){
+ .gallery-lightbox{padding:0;align-items:stretch}
+ .gallery-lightbox-panel{width:100%;height:100dvh;max-height:100dvh;border-radius:0;border:0}
+ .gallery-lightbox-head{padding:calc(10px + env(safe-area-inset-top)) 13px 10px}
+ .gallery-lightbox-media{flex:1}
+ .gallery-lightbox-media img,.gallery-lightbox-media video{max-height:100%;max-width:100%}
+ .gallery-lightbox-meta{padding:14px 16px calc(18px + env(safe-area-inset-bottom))}
+}
+</style>
+</head><body><header><nav class="wrap nav"><a class="brand" href="index.html"><img class="brand-logo" src="icons/icon-192.png?v=5" alt="" aria-hidden="true"> CLIMB TRACKER</a><div class="links"><a href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a><a href="leaderboard.html">Leaderboard</a><a class="active" href="gallery.html">Gallery</a></div></nav></header><main class="wrap page"><h1>Climbing Gallery</h1><p class="muted">Photos and videos from the climbing crew. Tap a climber to see their profile, stats and uploads.</p><div id="feed"></div><p id="status" class="notice" role="status"></p><button id="more" class="button" type="button">Load more posts</button></main><div id="galleryLightbox" class="gallery-lightbox" hidden role="dialog" aria-modal="true" aria-label="Gallery post">
+  <div class="gallery-lightbox-panel">
+    <div class="gallery-lightbox-head"><div id="lightboxAuthor"></div><button type="button" id="lightboxClose" class="gallery-lightbox-close" aria-label="Close post">×</button></div>
+    <div id="lightboxMedia" class="gallery-lightbox-media"></div>
+    <div class="gallery-lightbox-meta"><h2 id="lightboxTitle"></h2><p id="lightboxDate"></p></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const $ = id => document.getElementById(id);
 function avatar(name,url){const d=document.createElement('span');d.className='avatar';d.textContent=(name||'?').charAt(0).toUpperCase();if(url){const im=document.createElement('img');im.src=url;im.alt='';im.loading='lazy';im.onerror=()=>{im.remove();d.textContent=(name||'?').charAt(0).toUpperCase()};d.textContent='';d.append(im)}return d}
 function dateLabel(v){return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'}).format(new Date(v))}
@@ -187,7 +222,62 @@ function titleFor(climb){return (climb?.colour ? climb.colour.charAt(0).toUpperC
 async function getProfiles(ids){if(!ids.length)return new Map();const {data,error}=await supabaseClient.from('profiles').select('id,username,avatar_url').in('id',ids);if(error)throw error;return new Map((data||[]).map(x=>[x.id,x]))}
 async function getClimbs(ids){if(!ids.length)return new Map();const {data,error}=await supabaseClient.from('climbs').select('id,colour,grade,is_active').in('id',ids);if(error)throw error;return new Map((data||[]).map(x=>[x.id,x]))}
 function userLink(userId,profile){const a=document.createElement('a');a.href='climber.html?id='+encodeURIComponent(userId);a.className='user-link';a.append(avatar(profile?.username,profile?.avatar_url));const span=document.createElement('span');span.textContent=profile?.username||'Climber';a.append(span);return a}
-function renderPost(item,profiles,climbs){const climb=climbs.get(item.climb_id);if(!climb||!climb.is_active)return null;const user=profiles.get(item.user_id);const article=document.createElement('article');article.className='post';const header=document.createElement('div');header.className='post-head';header.append(userLink(item.user_id,user));const stamp=document.createElement('time');stamp.dateTime=item.created_at;stamp.textContent=dateLabel(item.created_at);header.append(stamp);const title=document.createElement('h2');title.textContent=titleFor(climb)+' completed by '+(user?.username||'Climber');const note=document.createElement('p');note.className='muted';note.textContent='Uploaded on '+dateLabel(item.created_at);article.append(header,mediaNode(item),title,note);return article}
+function renderPost(item,profiles,climbs){const climb=climbs.get(item.climb_id);if(!climb||!climb.is_active)return null;const user=profiles.get(item.user_id);const article=document.createElement('article');article.className='post';const header=document.createElement('div');header.className='post-head';header.append(userLink(item.user_id,user));const stamp=document.createElement('time');stamp.dateTime=item.created_at;stamp.textContent=dateLabel(item.created_at);header.append(stamp);const title=document.createElement('h2');title.textContent=titleFor(climb)+' completed by '+(user?.username||'Climber');const note=document.createElement('p');note.className='muted';note.textContent='Uploaded on '+dateLabel(item.created_at);article.append(header,mediaNode(item),title,note);
+article.tabIndex=0;
+article.setAttribute('aria-label','Open post: '+title.textContent);
+article.addEventListener('click',event=>{
+  if(event.target.closest('a,button'))return;
+  if(event.target.closest('video') && event.target.controls)return;
+  openGalleryPost(item,user,climb);
+});
+article.addEventListener('keydown',event=>{
+  if((event.key==='Enter'||event.key===' ') && event.target===article){
+    event.preventDefault();openGalleryPost(item,user,climb);
+  }
+});
+return article}
+
+
+let previousGalleryFocus=null;
+function openGalleryPost(item,user,climb){
+  const modal=$('galleryLightbox');
+  previousGalleryFocus=document.activeElement;
+  const author=$('lightboxAuthor'),media=$('lightboxMedia');
+  author.replaceChildren(userLink(item.user_id,user));
+  media.replaceChildren();
+  const element=mediaNode(item);
+  element.loading='eager';
+  if(element.tagName==='VIDEO'){element.controls=true;element.preload='metadata'}
+  media.append(element);
+  $('lightboxTitle').textContent=titleFor(climb)+' completed by '+(user?.username||'Climber');
+  $('lightboxDate').textContent='Uploaded on '+dateLabel(item.created_at);
+  modal.hidden=false;
+  document.body.classList.add('gallery-lightbox-open');
+  $('lightboxClose').focus();
+}
+function closeGalleryPost(){
+  const modal=$('galleryLightbox');
+  if(modal.hidden)return;
+  modal.hidden=true;
+  document.body.classList.remove('gallery-lightbox-open');
+  $('lightboxMedia').replaceChildren(); // stops video playback
+  if(previousGalleryFocus?.isConnected)previousGalleryFocus.focus();
+}
+$('lightboxClose').addEventListener('click',closeGalleryPost);
+$('galleryLightbox').addEventListener('click',event=>{
+  if(event.target===$('galleryLightbox'))closeGalleryPost();
+});
+document.addEventListener('keydown',event=>{
+  if($('galleryLightbox').hidden)return;
+  if(event.key==='Escape'){event.preventDefault();closeGalleryPost()}
+  if(event.key==='Tab'){
+    const focusables=[...$('galleryLightbox').querySelectorAll('a[href],button,[controls]')].filter(el=>el.getClientRects().length);
+    if(!focusables.length)return;
+    const first=focusables[0],last=focusables[focusables.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  }
+});
 
 let offset=0;const PAGE=18;let loading=false,done=false;
 async function loadMore(){if(loading||done)return;loading=true;$('more').disabled=true;$('status').textContent='Loading posts...';try{const {data,error}=await supabaseClient.from('climb_media').select('id,climb_id,user_id,storage_path,media_type,created_at').order('created_at',{ascending:false}).range(offset,offset+PAGE-1);if(error)throw error;offset+=(data||[]).length;const profiles=await getProfiles([...new Set((data||[]).map(x=>x.user_id))]);const climbs=await getClimbs([...new Set((data||[]).map(x=>x.climb_id))]);let count=0;for(const item of data||[]){const card=renderPost(item,profiles,climbs);if(card){$('feed').append(card);count++}}if((data||[]).length<PAGE)done=true;$('more').hidden=done;$('status').textContent=done?($('feed').children.length?'You are all caught up!':'No uploads yet. Complete a climb and add a photo or video on the tracker!'):'';}catch(e){console.error(e);$('status').textContent='Could not load gallery: '+e.message;$('more').hidden=false}finally{loading=false;$('more').disabled=false}}
