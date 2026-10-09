@@ -1,6 +1,21 @@
-CLIMB TRACKER DESKTOP 2.0 — REAL BRUSHWORKS PHOTOS
+CLIMB TRACKER — MOBILE 2.0 + DESKTOP 2.0
+========================================
+Includes the matching mobile visual overhaul, real Brushworks photos, climbing-hold background, and the desktop design.
 
-Upload ALL contents to the root of your GitHub repository, preserving the images/ and icons/ folders.
-Replace the HTML files and desktop-overhaul.css. Keep your existing images/gym-map.png, style.css and supabase-config.js.
+INSTALL
+1. Back up your existing repository files.
+2. Upload the contents of this ZIP to the ROOT of your Climbing-Website-Dev repository.
+3. Keep desktop-overhaul.css beside index.html.
+4. Upload icons/ and images/ folders (including the climbing-holds-pattern.svg).
+5. KEEP your existing style.css, supabase-config.js, and images/gym-map.png.
+6. Commit changes and reload your app. On iPhone, fully close/reopen the installed PWA.
 
-The three gym photos are used only as desktop banners. The interactive map and mobile layout are unchanged. No Supabase SQL is required.
+What changes:
+- Mobile home photo hero, new stat and leaderboard styling
+- Mobile Tracker gym photo banner, cleaner controls (no map coordinate changes)
+- Gallery photo banner, rounded posts, tap-to-expand viewer
+- Ranking and profile cards, login page, bottom navigation
+- Climbing hold pattern background, consistent teal/navy palette
+- Existing Desktop 2.0 visuals and photo banners stay in place
+
+No Supabase SQL changes. No new database tables. JavaScript syntax checked, but not live tested.
