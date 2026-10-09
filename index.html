@@ -55,6 +55,16 @@ header .links a:hover { opacity:.9; }
  .stat-card:last-child { grid-column:1/-1; }
  .home-map-marker { width:24px; height:24px; font-size:9px; }
 }
+
+/* Home leaderboard selector: one leaderboard at a time on every device. */
+.leaderboard-heading-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:32px;margin-bottom:14px}
+.leaderboard-heading-row .dashboard-heading{margin:0}
+.leaderboard-picker-label{display:flex;align-items:center;gap:9px;font-weight:650;color:#e2e8f0}
+.leaderboard-picker-label select{min-height:44px;padding:9px 36px 9px 12px;background:#24364d;color:#fff;border:1px solid #64748b;border-radius:10px;font:inherit;cursor:pointer}
+.leaderboard-picker-label select:focus-visible{outline:2px solid #66d9d5;outline-offset:3px}
+.home-leaderboard-single{grid-template-columns:minmax(0,1fr)!important}
+.home-leaderboard-single [hidden]{display:none!important}
+@media(max-width:600px){.leaderboard-heading-row{align-items:stretch}.leaderboard-picker-label{justify-content:space-between;width:100%}.leaderboard-picker-label select{flex:1;max-width:220px}}
 </style>
 <style id="mobile-responsive-upgrade">
 /* Mobile layout improvements — does not change Supabase or map coordinates. */
@@ -168,7 +178,7 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style></head>
+</style><style>@media(max-width:600px){.dashboard-table{width:100%;table-layout:fixed;font-size:11px}.dashboard-table th,.dashboard-table td{padding:9px 3px;overflow-wrap:anywhere}.dashboard-table th:nth-child(1){width:10%}.dashboard-table th:nth-child(2){width:32%}.dashboard-table th:nth-child(3){width:15%}.dashboard-table th:nth-child(4){width:24%}.dashboard-table th:nth-child(5){width:19%}.leaderboard-person-name{overflow-wrap:anywhere}}</style></head>
 <body>
 <header><nav class="wrap nav"><a class="brand" href="index.html">⛰ CLIMB TRACKER</a><div class="links"><a class="active" href="index.html">Home</a><a href="track.html">Track Climbs</a><a href="profile.html">My Profile</a>
       <a href="gallery.html">Gallery</a><a href="leaderboard.html">Leaderboard</a></div></nav></header>
@@ -176,10 +186,10 @@ button, input, select, textarea { max-width: 100%; }
 <section class="hero"><h1 id="welcomeHeading">Welcome, climbers.</h1><p>Track your climbs.</p><div class="dashboard-links"><a class="button" href="track.html">Explore the gym map →</a><a class="secondary-link" href="profile.html">My Profile</a><a class="secondary-link" href="leaderboard.html">Full Leaderboard</a><a class="secondary-link" href="gallery.html">Climbing Gallery →</a></div></section>
 <h2 class="dashboard-heading">Your Stats This Month</h2>
 <div class="stats-grid"><div class="stat-card"><div id="myClimbs" class="stat-number">—</div><div class="stat-label">Climbs Sent</div></div><div class="stat-card"><div id="myPoints" class="stat-number">—</div><div class="stat-label">Points Earned</div></div><div class="stat-card"><div id="myRank" class="stat-number">—</div><div class="stat-label">Monthly Rank</div></div></div>
-<h2 class="dashboard-heading">Climbing Leaderboards</h2>
-<div class="leaderboard-grid">
-<section class="dashboard-card"><h3>This Month</h3><p>Points from sends logged this month.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Points</th></tr></thead><tbody id="monthlyLeaderboard"><tr><td colspan="4">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
-<section class="dashboard-card"><h3>All Time</h3><p>Total points across all recorded sends.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Points</th></tr></thead><tbody id="allTimeLeaderboard"><tr><td colspan="4">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
+<div class="leaderboard-heading-row"><h2 class="dashboard-heading">Climbing Leaderboards</h2><label class="leaderboard-picker-label" for="homeLeaderboardPicker">Show <select id="homeLeaderboardPicker" aria-label="Choose leaderboard"><option value="monthly">This Month</option><option value="alltime">All Time</option></select></label></div>
+<div class="leaderboard-grid home-leaderboard-single">
+<section id="homeMonthlyBoard" class="dashboard-card"><h3>This Month</h3><p>Points from sends logged this month.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Hardest Climb</th><th>Points</th></tr></thead><tbody id="monthlyLeaderboard"><tr><td colspan="5">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
+<section id="homeAllTimeBoard" class="dashboard-card" hidden><h3>All Time</h3><p>Total points across all recorded sends.</p><table class="dashboard-table"><thead><tr><th>Rank</th><th>Climber</th><th>Climbs</th><th>Hardest Climb</th><th>Points</th></tr></thead><tbody id="allTimeLeaderboard"><tr><td colspan="5">Loading...</td></tr></tbody></table><a class="leaderboard-footer" href="leaderboard.html">View full leaderboard →</a></section>
 </div>
 <h2 class="dashboard-heading">Climbing Gallery</h2>
 <section class="dashboard-card"><h3>Photos &amp; Videos from the Wall</h3><p>See climbs completed by the Brushworks crew, watch videos and visit climber profiles.</p><a class="leaderboard-footer" href="gallery.html">View full gallery →</a></section>
@@ -206,7 +216,7 @@ function renderLeaderboard(elementId, rows, avatars = {}) {
  tbody.replaceChildren();
  if (!rows.length) {
   const tr = document.createElement('tr'), td = document.createElement('td');
-  td.colSpan = 4; td.textContent = 'No climbers yet.';
+  td.colSpan = 5; td.textContent = 'No climbers yet.';
   tr.appendChild(td); tbody.appendChild(tr); return;
  }
  rows.slice(0,5).forEach((player,index) => {
@@ -224,7 +234,7 @@ function renderLeaderboard(elementId, rows, avatars = {}) {
   } else person.appendChild(fallback());
   const label=document.createElement('span'); label.className='leaderboard-person-name'; label.textContent=player.username;
   person.appendChild(label); nameCell.appendChild(person); tr.appendChild(nameCell);
-  [player.total_sends,player.points].forEach(value => { const td=document.createElement('td'); td.textContent=value; tr.appendChild(td); });
+  [player.total_sends,player.hardest_grade == null ? "—" : "V" + player.hardest_grade,player.points].forEach(value => { const td=document.createElement('td'); td.textContent=value; tr.appendChild(td); });
   tbody.appendChild(tr);
  });
 }
@@ -235,8 +245,8 @@ async function loadDashboard() {
   currentUser=auth.data.user;
   const [profile,monthly,allTime]=await Promise.all([
    supabaseClient.from('profiles').select('username').eq('id',currentUser.id).maybeSingle(),
-   supabaseClient.from('monthly_leaderboard_flashes').select('id, username, total_sends, points'),
-   supabaseClient.from('leaderboard_flashes').select('id, username, total_sends, points')
+   supabaseClient.from('monthly_leaderboard_flashes').select('id, username, total_sends, points, hardest_grade'),
+   supabaseClient.from('leaderboard_flashes').select('id, username, total_sends, points, hardest_grade')
   ]);
   if(profile.error)throw profile.error;if(monthly.error)throw monthly.error;if(allTime.error)throw allTime.error;
   if(!profile.data){location.replace('profile.html');return;}
@@ -288,4 +298,15 @@ async function loadHomeMap(){
 }
 loadDashboard();loadHomeMap();
 </script>
-<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html" aria-current="page"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav></body></html>
+<nav class="mobile-app-bar" aria-label="Mobile navigation"><a href="index.html" aria-current="page"><span class="app-icon" aria-hidden="true">⌂</span><span>Home</span></a><a href="track.html"><span class="app-icon" aria-hidden="true">⌖</span><span>Track</span></a><a href="gallery.html"><span class="app-icon" aria-hidden="true">▧</span><span>Gallery</span></a><a href="leaderboard.html"><span class="app-icon" aria-hidden="true">★</span><span>Ranks</span></a><a href="profile.html"><span class="app-icon" aria-hidden="true">◉</span><span>Profile</span></a></nav><script>
+(function(){
+ const picker=document.getElementById('homeLeaderboardPicker');
+ const monthly=document.getElementById('homeMonthlyBoard');
+ const allTime=document.getElementById('homeAllTimeBoard');
+ if(!picker||!monthly||!allTime)return;
+ function switchBoard(){const showAll=picker.value==='alltime';monthly.hidden=showAll;allTime.hidden=!showAll;}
+ picker.addEventListener('change',switchBoard);
+ switchBoard();
+})();
+</script>
+</body></html>

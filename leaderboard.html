@@ -145,7 +145,7 @@ button, input, select, textarea { max-width: 100%; }
  #more{min-height:46px;width:100%}
 }
 @media(max-width:370px){.mobile-app-bar a{font-size:9px}.mobile-app-bar a .app-icon{font-size:21px}}
-</style></head>
+</style><style>.player-hardest{font-size:12px;color:#a5f3fc;margin-top:4px}</style></head>
 <body>
 <header><nav class="wrap nav">
 <a class="brand" href="index.html">⛰ CLIMB TRACKER</a>
@@ -200,7 +200,7 @@ async function loadLeaderboard() {
   message.textContent = "Loading leaderboard...";
   try {
     const view = currentPeriod === "monthly" ? "monthly_leaderboard_flashes" : "leaderboard_flashes";
-    const {data,error} = await supabaseClient.from(view).select("id, username, total_sends, points");
+    const {data,error} = await supabaseClient.from(view).select("id, username, total_sends, points, hardest_grade");
     if (error) throw error;
     const players = sortPlayers(data || []);
     const avatars = new Map();
@@ -234,7 +234,10 @@ async function loadLeaderboard() {
       const climbs = document.createElement("div");
       climbs.className = "player-climbs";
       climbs.textContent = player.total_sends + " climbs sent";
-      info.append(name,climbs);
+      const hardest = document.createElement("div");
+      hardest.className = "player-hardest";
+      hardest.textContent = "Hardest climb: " + (player.hardest_grade == null ? "—" : "V" + player.hardest_grade);
+      info.append(name,climbs,hardest);
       const points = document.createElement("div");
       points.className = "player-points";
       points.textContent = player.points;
