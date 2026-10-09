@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>Brushworks Tracker | Track Climbs</title>
   <link rel="stylesheet" href="style.css">
 
@@ -28,21 +27,20 @@
     .climb-marker {
       position: absolute;
       transform: translate(-50%, -50%);
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 2px solid white;
-      background: #3979ff;
-      color: white;
-      font-weight: bold;
       font-size: 11px;
+      font-weight: bold;
       cursor: pointer;
       z-index: 2;
-      box-shadow: 0 2px 8px #0008;
+      box-shadow: 0 2px 8px #0009;
     }
 
     .climb-marker.sent {
-      background: #16a34a;
+      border: 3px solid #22c55e;
+      box-shadow: 0 0 0 2px #052e16, 0 2px 8px #0009;
     }
 
     .climb-marker:hover {
@@ -57,9 +55,7 @@
       margin-top: 20px;
     }
 
-    .tracker-panel h2 {
-      margin-top: 0;
-    }
+    .tracker-panel h2 { margin-top: 0; }
 
     .tracker-panel select,
     .tracker-panel button {
@@ -87,29 +83,13 @@
       cursor: not-allowed;
     }
 
-    .tracker-panel .secondary {
-      background: #475569;
-    }
+    .tracker-panel .secondary { background: #475569; }
+    .tracker-panel .success { background: #15803d; }
+    .tracker-panel .danger { background: #b91c1c; }
+    .hidden { display: none !important; }
+    .tracker-panel .muted { color: #9ca3af; }
 
-    .tracker-panel .success {
-      background: #15803d;
-    }
-
-    .tracker-panel .danger {
-      background: #b91c1c;
-    }
-
-    .tracker-panel .hidden {
-      display: none;
-    }
-
-    .tracker-panel .muted {
-      color: #9ca3af;
-    }
-
-    #sendList {
-      padding-left: 20px;
-    }
+    #sendList { padding-left: 20px; }
 
     #trackerMessage {
       margin-top: 15px;
@@ -124,20 +104,39 @@
       margin: 15px 0;
     }
 
-    .tracker-links a {
-      color: #93c5fd;
+    .tracker-links a { color: #93c5fd; }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin: 18px 0;
+    }
+
+    .field-row label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .colour-dot {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid #ffffff88;
+      vertical-align: middle;
+      margin-right: 6px;
     }
   </style>
 </head>
 
 <body>
-
   <header>
     <nav class="wrap nav">
       <a class="brand" href="index.html">
         ⛰ BRUSHWORKS TRACKER
       </a>
-
       <div class="links">
         <a href="index.html">Home</a>
         <a class="active" href="track.html">Track Climbs</a>
@@ -148,15 +147,12 @@
   </header>
 
   <main class="wrap">
-
     <div class="eyebrow">Your climbing gym</div>
-
     <h1>Track Climbs</h1>
 
     <p>
-      Tap a spot on the gym map to add a new climb.
-      Tap an existing marker to log your send or see
-      who else has completed it.
+      Tap the gym map to add a climb, choose its hold
+      colour and V grade, then log your send.
     </p>
 
     <div class="tracker-links">
@@ -168,99 +164,102 @@
       <h2>Brushworks Gym Map</h2>
 
       <p class="muted">
-        Blue markers are available climbs.
-        Green markers are climbs you've sent.
+        Markers match the climb's hold colour.
+        A green border and check mark mean you've sent it.
       </p>
 
       <div id="mapContainer" class="map-container">
-
         <img
           id="gymMap"
           src="images/gym-map.png"
           alt="Top-down map of Brushworks climbing gym"
         >
-
-        <!-- Shared climb markers appear here -->
-
       </div>
 
       <p class="muted">
-        Click an empty spot to create a climb.
-        Click a marker to view its details.
+        Click an empty spot to add a climb.
+        Click a marker to view an existing climb.
       </p>
     </section>
 
-    <!-- Add climb panel -->
     <section id="addPanel" class="tracker-panel hidden">
-
       <h2>Add a New Climb</h2>
 
       <p class="muted">
-        Choose the grade for the spot you selected.
+        Select the grade and the colour of the holds
+        on the actual climb.
       </p>
 
-      <label for="gradeSelect">Climb grade</label>
+      <div class="field-row">
+        <div>
+          <label for="gradeSelect">Climb grade</label>
+          <select id="gradeSelect">
+            <option value="0">V0</option>
+            <option value="1">V1</option>
+            <option value="2">V2</option>
+            <option value="3">V3</option>
+            <option value="4">V4</option>
+            <option value="5">V5</option>
+            <option value="6">V6</option>
+            <option value="7">V7</option>
+            <option value="8">V8</option>
+            <option value="9">V9</option>
+            <option value="10">V10</option>
+          </select>
+        </div>
 
-      <select id="gradeSelect">
-        <option value="0">V0</option>
-        <option value="1">V1</option>
-        <option value="2">V2</option>
-        <option value="3">V3</option>
-        <option value="4">V4</option>
-        <option value="5">V5</option>
-        <option value="6">V6</option>
-        <option value="7">V7</option>
-        <option value="8">V8</option>
-        <option value="9">V9</option>
-        <option value="10">V10</option>
-      </select>
+        <div>
+          <label for="colourSelect">Hold colour</label>
+          <select id="colourSelect">
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="yellow">Yellow</option>
+            <option value="orange">Orange</option>
+            <option value="purple">Purple</option>
+            <option value="pink">Pink</option>
+            <option value="black">Black</option>
+            <option value="white">White</option>
+            <option value="grey">Grey</option>
+          </select>
+        </div>
+      </div>
 
       <div>
-        <button id="saveClimbBtn">
-          Save Climb
-        </button>
-
+        <button id="saveClimbBtn">Save Climb</button>
         <button id="cancelAddBtn" class="secondary">
           Cancel
         </button>
       </div>
-
     </section>
 
-    <!-- Existing climb panel -->
     <section id="climbPanel" class="tracker-panel hidden">
-
       <h2 id="selectedGrade">Climb Details</h2>
-
       <p id="climbInfo" class="muted"></p>
 
       <h3>Climbers who sent this</h3>
-
       <ul id="sendList"></ul>
 
       <div>
         <button id="sendBtn" class="success">
           Mark as Sent
         </button>
-
         <button id="removeSendBtn" class="danger hidden">
           Remove My Send
         </button>
-
         <button id="closeClimbBtn" class="secondary">
           Close
         </button>
       </div>
-
     </section>
 
     <p id="trackerMessage" role="status"></p>
-
   </main>
 
   <footer>
     <div class="wrap">
-      Made for the Brushworks climbing crew · Unofficial fan project
+      Made for the Brushworks climbing crew ·
+      Unofficial fan project
     </div>
   </footer>
 
@@ -272,6 +271,19 @@
     const addPanel = document.getElementById("addPanel");
     const climbPanel = document.getElementById("climbPanel");
     const trackerMessage = document.getElementById("trackerMessage");
+
+    const COLOURS = {
+      red: "#dc2626",
+      blue: "#2563eb",
+      green: "#16a34a",
+      yellow: "#facc15",
+      orange: "#f97316",
+      purple: "#9333ea",
+      pink: "#ec4899",
+      black: "#171717",
+      white: "#ffffff",
+      grey: "#6b7280"
+    };
 
     let currentUser = null;
     let currentProfile = null;
@@ -315,7 +327,6 @@
         }
 
         currentProfile = profileResult.data;
-
         await loadClimbs();
 
       } catch (error) {
@@ -328,7 +339,9 @@
       const [climbResult, sendResult] = await Promise.all([
         supabaseClient
           .from("climbs")
-          .select("id, grade, x_position, y_position, created_at")
+          .select(
+            "id, grade, colour, x_position, y_position, created_at"
+          )
           .order("created_at", { ascending: true }),
 
         supabaseClient
@@ -355,16 +368,30 @@
 
       climbs.forEach(climb => {
         const marker = document.createElement("button");
+        const sent = mySentClimbIds.has(climb.id);
 
         marker.type = "button";
         marker.className = "climb-marker";
 
-        if (mySentClimbIds.has(climb.id)) {
-          marker.classList.add("sent");
-        }
+        if (sent) marker.classList.add("sent");
 
-        marker.textContent = "V" + climb.grade;
-        marker.title = "V" + climb.grade + " — view climb";
+        marker.style.backgroundColor =
+          COLOURS[climb.colour] || COLOURS.blue;
+
+        marker.style.color =
+          ["yellow", "white", "orange"].includes(climb.colour)
+            ? "#111827"
+            : "#ffffff";
+
+        marker.textContent = sent
+          ? "✓"
+          : "V" + climb.grade;
+
+        marker.title =
+          "V" + climb.grade + " " + climb.colour +
+          (sent ? " — Sent" : " — Not sent");
+
+        marker.setAttribute("aria-label", marker.title);
 
         marker.style.left = climb.x_position + "%";
         marker.style.top = climb.y_position + "%";
@@ -378,8 +405,9 @@
       });
     }
 
-    // Click an empty location on the map to add a climb
     mapContainer.addEventListener("click", event => {
+      if (event.target.closest(".climb-marker")) return;
+
       if (!currentUser || !currentProfile) {
         showMessage("Please log in and create a profile first.");
         return;
@@ -398,7 +426,8 @@
       selectedClimb = null;
       hidePanels();
       addPanel.classList.remove("hidden");
-      showMessage("Choose the grade, then save your climb.");
+
+      showMessage("Choose the grade and hold colour.");
 
       addPanel.scrollIntoView({
         behavior: "smooth",
@@ -417,7 +446,6 @@
 
       const button = document.getElementById("saveClimbBtn");
       button.disabled = true;
-
       showMessage("Saving climb...");
 
       try {
@@ -425,10 +453,14 @@
           document.getElementById("gradeSelect").value
         );
 
+        const colour =
+          document.getElementById("colourSelect").value;
+
         const { error } = await supabaseClient
           .from("climbs")
           .insert({
             grade: grade,
+            colour: colour,
             x_position: pendingPosition.x,
             y_position: pendingPosition.y,
             created_by: currentUser.id
@@ -438,11 +470,10 @@
 
         pendingPosition = null;
         hidePanels();
-
         await loadClimbs();
 
         showMessage(
-          "Climb added! Click its marker to log your send."
+          "Climb added! Click its coloured marker to log your send."
         );
 
       } catch (error) {
@@ -459,10 +490,14 @@
       hidePanels();
 
       document.getElementById("selectedGrade")
-        .textContent = "V" + climb.grade + " Climb";
+        .textContent =
+          "V" + climb.grade + " — " +
+          climb.colour.charAt(0).toUpperCase() +
+          climb.colour.slice(1);
 
       document.getElementById("climbInfo")
-        .textContent = climb.grade + " points per send";
+        .textContent =
+          climb.grade + " points per send";
 
       const sent = mySentClimbIds.has(climb.id);
 
@@ -564,7 +599,6 @@
         renderMarkers();
 
         showMessage("Your send has been removed.");
-
         await openClimb(selectedClimb);
 
       } catch (error) {
@@ -583,6 +617,5 @@
 
     initialiseTracker();
   </script>
-
 </body>
 </html>
