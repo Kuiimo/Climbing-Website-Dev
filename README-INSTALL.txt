@@ -1,9 +1,14 @@
-BRANDING UPDATE — 9 October 2026
+CLIMB TRACKER — DESKTOP 2.0
+===========================
+1. Keep a backup of your existing GitHub files.
+2. Upload the contents of this ZIP into the ROOT of Climbing-Website-Dev.
+3. Keep the icons folder as icons/ and desktop-overhaul.css beside index.html.
+4. Replace the HTML pages, manifest and service worker if GitHub prompts.
+5. Keep your existing style.css, supabase-config.js and images/ folder.
+6. Commit and hard refresh on desktop (Ctrl+Shift+R).
 
-Upload the HTML files, icons folder, manifest.webmanifest and service-worker.js to the ROOT of your GitHub repository, replacing matching files.
-
-The website header now uses the same navy (#142133) and teal (#35b8b5) on desktop and mobile, with a small teal-only mountain icon. No Supabase changes.
-
-IMPORTANT: login.html was NOT included in the source files available for this update, so it has NOT been changed. Send your current login.html to have its styling/logo updated without breaking authentication. Do not replace or delete your existing login.html.
-
-Keep existing style.css and supabase-config.js.
+The desktop redesign activates on screens wider than 900px.
+Mobile/PWA styling is intentionally unchanged.
+No SQL required. Supabase auth, sends, flash bonuses and date filters are untouched.
+The desktop Gallery now uses a three-column media feed; existing media records remain unchanged.
+Test on your actual GitHub Pages site before sharing widely.

@@ -1,0 +1,117 @@
+
+/* CLIMB TRACKER DESKTOP 2.0 — isolated from phone/PWA layouts */
+@media (min-width: 901px) {
+ :root{--d-bg:#07111e;--d-card:#0d2032;--d-card2:#10283d;--d-border:#244259;--d-teal:#26d6cd;--d-muted:#9eb4c7}
+ html{scroll-behavior:smooth}
+ body{background:radial-gradient(ellipse 65% 30% at 55% 0%,#12314b 0%,transparent 80%),#07111e!important;color:#e9f4fc!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;line-height:1.55}
+ .wrap{width:min(calc(100% - 76px),1320px)!important;max-width:1320px!important}
+ header{position:sticky!important;top:0;z-index:1000;background:rgba(7,20,34,.94)!important;border-bottom:1px solid #254458!important;backdrop-filter:blur(18px);box-shadow:0 10px 28px #0003}
+ header .nav{min-height:76px!important;padding:12px 0!important;gap:26px!important}
+ header .brand{font-size:15px!important;letter-spacing:.055em!important;color:#29d8ce!important}
+ header .brand img.brand-logo{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important;flex-basis:40px!important;border-radius:12px!important}
+ header .links{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:nowrap!important}
+ header .links a{background:transparent!important;border:1px solid transparent!important;border-radius:12px!important;padding:11px 17px!important;color:#b8cddd!important;font-size:13px!important;font-weight:700!important;white-space:nowrap;transition:background .2s,color .2s,transform .2s}
+ header .links a:hover{background:#14374b!important;color:#fff!important;transform:translateY(-1px)}
+ header .links a.active{background:linear-gradient(110deg,#0f4654,#15586a)!important;color:#58fff0!important;border-color:#246677!important;box-shadow:inset 0 1px #ffffff12,0 0 22px #19d6c51a}
+ h1,h2,h3{letter-spacing:-.035em;color:#f4fbff}
+ h1{font-size:clamp(36px,3.3vw,52px)!important;line-height:1.15}
+ h2{font-size:clamp(23px,2vw,30px)}
+ p,.muted{color:#a9bfd1}
+ .button,button:not(.zoom-button):not(.show-password):not(.text-button),.secondary-link{border-radius:12px;transition:transform .2s,box-shadow .2s}
+ .button:hover,button:hover,.secondary-link:hover{transform:translateY(-1px)}
+ select,input[type="date"],input[type="text"],input[type="number"]{accent-color:#27d8ce}
+ :is(button,a,input,select):focus-visible{outline:2px solid #2de0d5!important;outline-offset:3px}
+ .dashboard-card,.stat-card,.card,.tracker-panel,.profile-card,.post,.player-row,.stat{background:linear-gradient(160deg,#10283d,#0b1c2d)!important;border:1px solid #274459!important;box-shadow:0 14px 36px #0003,inset 0 1px #ffffff0a;border-radius:20px!important}
+ .dashboard-card:hover,.stat-card:hover,.post:hover{border-color:#316477!important}
+ .dashboard-heading{margin-top:38px!important}
+ .stat-number,.stat strong{color:#50e5dc!important}
+ .dashboard-table th{color:#8eaac0!important;text-transform:uppercase;letter-spacing:.07em;font-size:11px!important}
+ .dashboard-table tr:hover td{background:#1a405028}
+ .leaderboard-footer,.user-link,a.back{color:#42e2d6!important}
+ .period-date-range,.leaderboard-tabs,.home-map-toolbar,.map-toolbar{background:#0e2537;border:1px solid #26475c;border-radius:15px;padding:12px 16px}
+ .home-map{border-radius:17px!important;border:1px solid #3c6072!important;box-shadow:0 16px 40px #0006}
+ footer{opacity:.65}
+}
+/* Desktop Home */
+@media(min-width:901px){
+ body:has(#welcomeHeading) .hero{position:relative;isolation:isolate;overflow:hidden;min-height:335px;margin:32px 0 22px!important;padding:48px 52px!important;border:1px solid #27536a;border-radius:25px;background:linear-gradient(90deg,#071724 5%,#0a2438ed 50%,#0b263a9e 100%),url('images/gym-map.png') right 36% center/auto 130% no-repeat,#10283c;box-shadow:0 25px 65px #0005}
+ body:has(#welcomeHeading) .hero:before{content:"YOUR CLIMBING HQ  /  BRUSHWORKS";display:block;font-size:11px;font-weight:800;letter-spacing:.22em;color:#48e4d8;margin-bottom:22px}
+ body:has(#welcomeHeading) .hero:after{content:"";position:absolute;right:-110px;top:-140px;width:420px;height:420px;border-radius:50%;background:#20d7c91c;filter:blur(50px);z-index:-1}
+ body:has(#welcomeHeading) .hero h1{font-size:clamp(38px,4vw,59px)!important;max-width:720px;margin:0 0 14px!important}
+ body:has(#welcomeHeading) .hero p{font-size:17px!important;max-width:570px;color:#c2d6e5}
+ .dashboard-links{margin-top:26px!important;gap:10px!important}
+ .dashboard-links a{padding:13px 19px!important;border-radius:12px!important;font-size:13px}
+ .dashboard-links .button{background:#26d6cd!important;color:#061826!important;font-weight:800;box-shadow:0 8px 22px #13d6c233}
+ .secondary-link{background:#112b3d!important;border:1px solid #315267!important;color:#d7ecf6!important}
+ .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important}
+ .stat-card{text-align:left!important;padding:24px 27px!important;min-height:125px}
+ .stat-number{font-size:42px!important;line-height:1.15;margin:7px 0!important}
+ .stat-label{font-size:12px!important;text-transform:uppercase;letter-spacing:.13em}
+ .dashboard-card{padding:26px 30px!important}
+ .leaderboard-heading-row{margin-top:34px!important}
+ .leaderboard-picker-label select{background:#102d41!important;border:1px solid #326075!important}
+}
+/* Desktop tracker: generous interactive map and a proper workspace */
+@media(min-width:901px){
+ body:has(#mapViewport) main.wrap{padding-top:32px;padding-bottom:55px}
+ body:has(#mapViewport) main.wrap>h1{margin:0 0 8px}
+ body:has(#mapViewport) .tracker-links{display:flex;gap:12px;margin:20px 0}
+ body:has(#mapViewport) main.wrap>.card{padding:25px 28px!important}
+ body:has(#mapViewport) #mapViewport{border-radius:18px!important;border:1px solid #355e71!important;background:#091826!important;box-shadow:inset 0 0 35px #0007;max-height:76vh}
+ body:has(#mapViewport) #mapContainer{margin:auto}
+ body:has(#mapViewport) .map-toolbar{margin:12px 0!important;gap:12px!important}
+ body:has(#mapViewport) .map-toolbar button{border-radius:10px!important}
+ body:has(#mapViewport) .tracker-panel{padding:28px!important;margin-top:20px!important}
+ body:has(#mapViewport) .tracker-panel:not(.hidden){animation:panelIn .22s ease-out}
+ @keyframes panelIn{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+}
+/* Gallery: editorial 3-column cards, no giant images */
+@media(min-width:901px){
+ body:has(#feed) main.page{max-width:1320px!important;margin:44px auto 75px!important}
+ body:has(#feed) main.page>h1{margin:0 0 9px!important}
+ body:has(#feed) main.page>.muted{font-size:16px;max-width:720px;margin-bottom:30px}
+ #feed{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px!important;align-items:start}
+ #feed .post{margin:0!important;overflow:hidden!important;min-width:0}
+ #feed .post-head{padding:16px!important;min-height:76px}
+ #feed .post-media{width:100%!important;height:255px!important;max-height:255px!important;object-fit:contain!important;background:#061321!important}
+ #feed .post h2{font-size:16px!important;margin:16px 16px 7px!important;line-height:1.35}
+ #feed .post p{font-size:13px!important;margin:0 16px 18px!important}
+ #feed .avatar{width:38px;height:38px;flex-basis:38px}
+ #feed .post-head time{font-size:11px}
+ #more{display:block;margin:30px auto!important;padding:13px 26px!important}
+}
+/* Leaderboard */
+@media(min-width:901px){
+ .leaderboard-page{padding-top:44px!important;max-width:1170px!important}
+ .leaderboard-page h1{margin:0 0 24px}
+ .leaderboard-tabs{padding:18px 22px!important;margin-bottom:22px!important}
+ #playerList{display:grid;gap:12px}
+ .player-row{padding:18px 24px!important;transition:transform .18s,border-color .18s}
+ .player-row:hover{transform:translateY(-2px);border-color:#3e7786!important}
+ .player-rank{color:#52e1d8!important}
+ .player-points{color:#5af0e4!important}
+}
+/* Profiles */
+@media(min-width:901px){
+ .profile-container{padding-top:40px!important;padding-bottom:70px!important}
+ .profile-card{padding:30px!important;margin-bottom:20px!important}
+ .profile-top{gap:22px!important}
+ .profile-top .avatar{width:100px!important;height:100px!important;flex-basis:100px!important}
+ .profile-stats,.stats{gap:16px!important}
+ .profile-stat,.stat{background:#081827!important;border:1px solid #29485b!important;border-radius:15px!important;padding:22px!important}
+ .profile-stat strong,.stat strong{font-size:31px!important}
+ .grades{gap:10px!important}
+ .grade{background:#102f43!important;border:1px solid #30516a;border-radius:12px!important}
+}
+/* Login */
+@media(min-width:901px){
+ .login-main{min-height:calc(100vh - 130px)!important;padding:60px 25px!important;background:radial-gradient(ellipse 50% 45% at 50% 30%,#123e50a1,transparent 80%)}
+ .login-card{max-width:465px!important;background:linear-gradient(160deg,#122b3f,#0a1b2b)!important;border:1px solid #31546b!important;border-radius:24px!important;padding:44px!important;box-shadow:0 26px 75px #0008!important}
+ .login-icon{background:#071b2b!important;border:1px solid #28566b}
+ .login-button{background:#27d6cd!important}
+}
+@media(min-width:901px) and (max-width:1100px){
+ #feed{grid-template-columns:repeat(2,minmax(0,1fr))}
+ header .links a{padding:10px 12px!important}
+ .wrap{width:min(calc(100% - 44px),1320px)!important}
+}
