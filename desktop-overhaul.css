@@ -123,3 +123,16 @@
  body:has(#feed) main.page:before{content:'';display:block;height:235px;margin:0 0 30px;border-radius:24px;border:1px solid #2a5364;background:linear-gradient(90deg,#061624aa,transparent 80%),url('images/brushworks-wall.webp') center 48%/cover no-repeat;box-shadow:0 18px 48px #0005;}
  body:has(#mapViewport) main.wrap:before{content:'';display:block;height:245px;margin:0 0 26px;border-radius:22px;border:1px solid #2a5364;background:linear-gradient(90deg,#06162466,transparent 85%),url('images/brushworks-gym.webp') center 26%/cover no-repeat;}
 }
+
+/* Subtle climbing hold outlines behind the desktop content only.
+   The decorative SVG is transparent, lightweight, and never intercepts clicks. */
+@media (min-width: 901px) {
+ body {
+   background-image: url('images/climbing-holds-pattern.svg'), radial-gradient(ellipse 65% 30% at 55% 0%,#12314b 0%,transparent 80%) !important;
+   background-color: #07111e !important;
+   background-position: center top, center top !important;
+   background-size: 1600px 900px, auto !important;
+   background-repeat: repeat, no-repeat !important;
+   background-attachment: fixed, scroll !important;
+ }
+}
