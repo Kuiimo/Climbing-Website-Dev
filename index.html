@@ -35,6 +35,9 @@ header .links a:hover { opacity:.9; }
 /* Leaderboard profile pictures */
 .leaderboard-person { display:flex; align-items:center; gap:9px; min-width:0; }
 .leaderboard-avatar { width:32px; height:32px; flex:0 0 32px; border-radius:50%; object-fit:cover; background:#35b8b5; color:#081521; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+.leaderboard-person-link { display:flex; align-items:center; gap:9px; min-width:0; color:inherit; text-decoration:none; border-radius:7px; }
+.leaderboard-person-link:hover .leaderboard-person-name { color:#66d9d5; text-decoration:underline; }
+.leaderboard-person-link:focus-visible { outline:2px solid #66d9d5; outline-offset:4px; }
 .leaderboard-person-name { overflow-wrap:anywhere; }
 /* New read-only map: all existing dashboard sections remain unchanged. */
 .home-map-toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:16px 0; color:#cbd5e1; }
@@ -99,7 +102,7 @@ function renderLeaderboard(elementId, rows, avatars = {}) {
   if (currentUser && player.id === currentUser.id) tr.classList.add('me');
   const rank = document.createElement('td'); rank.textContent = '#' + (index+1); tr.appendChild(rank);
   const nameCell = document.createElement('td');
-  const person = document.createElement('div'); person.className = 'leaderboard-person';
+  const person = document.createElement('a'); person.className = 'leaderboard-person leaderboard-person-link'; person.href = 'climber.html?id=' + encodeURIComponent(player.id); person.setAttribute('aria-label', 'View ' + (player.username || 'climber') + '\'s profile');
   const avatarUrl = avatars[player.id];
   const fallback = () => { const circle=document.createElement('span'); circle.className='leaderboard-avatar'; circle.textContent=String(player.username||'?').charAt(0).toUpperCase(); return circle; };
   if (avatarUrl) {
