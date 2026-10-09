@@ -548,13 +548,28 @@ header .links a.active { background:#35b8b5 !important; color:#081521 !important
  header .brand img.brand-logo { width:30px !important; height:30px !important; min-width:30px !important; min-height:30px !important; max-width:30px !important; max-height:30px !important; flex-basis:30px !important; border-radius:8px !important; }
  header a.brand,header .brand { font-size:14px !important; }
 }
-</style></head>
+</style>
+<style id="track-mobile-marker-and-logo-fix">
+/* Reduce the visual footprint of map pins on narrow phone screens. */
+@media (max-width: 700px) {
+  #map .climb-marker, #map .preview-marker,
+  .climb-marker, .preview-marker {
+    width: 26px !important; height: 26px !important;
+    min-width: 26px !important; min-height: 26px !important;
+    font-size: 9px !important; border-width: 2px !important;
+  }
+  .climb-marker.sent { border-width: 2px !important; box-shadow:0 0 0 1px #052e16,0 2px 6px #0009 !important; }
+  .preview-marker { font-size: 17px !important; }
+  header .brand img.brand-logo { width:30px !important; height:30px !important; }
+}
+</style>
+</head>
 
 <body>
   <header>
     <nav class="wrap nav">
       <a class="brand" href="index.html">
-        ⛰ CLIMB TRACKER
+        <img class="brand-logo" src="icons/icon-192.png" alt="" aria-hidden="true"> <span>CLIMB TRACKER</span>
       </a>
 
       <div class="links">
