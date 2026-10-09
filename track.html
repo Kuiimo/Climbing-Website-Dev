@@ -345,6 +345,34 @@
         min-height: 46px;
       }
     }
+
+    /* LARGE RESPONSIVE TRACKER — overrides page width limits */
+    @media (min-width: 769px) {
+      body > main.wrap {
+        width: calc(100% - 48px) !important;
+        max-width: 1900px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }
+      body > main.wrap > .card {
+        width: 100% !important;
+        max-width: none !important;
+      }
+      #mapViewport {
+        width: 100% !important;
+        height: min(92vh, 1200px) !important;
+        min-height: 680px !important;
+        max-height: none !important;
+      }
+    }
+    @media (max-width: 768px) {
+      #mapViewport {
+        width: 100% !important;
+        height: 65vh !important;
+        min-height: 350px !important;
+        max-height: 650px !important;
+      }
+    }
   </style>
 </head>
 
